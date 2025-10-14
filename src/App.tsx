@@ -6,6 +6,7 @@ import Login from "./Pages/Login";
 import Molduras from "./Pages/Molduras";
 import Cuadros from "./Pages/cuadros";
 import Nosotros from "./Pages/Nosotros";
+import Carrito from "./Pages/Carrito";
 
 function App() {
   return (
@@ -54,6 +55,11 @@ function App() {
                   Cuadros
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/carrito">
+                  Carrito
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -69,6 +75,7 @@ function App() {
           <Route path="/molduras" element={<Molduras />} />
           <Route path="/cuadros" element={<Cuadros />} />
           <Route path="/nosotros" element={<Nosotros />} />
+          <Route path="/carrito" element={<Carrito />} />
         </Routes>
       </div>
 
