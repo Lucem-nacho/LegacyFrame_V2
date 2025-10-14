@@ -1,0 +1,16 @@
+import React from "react";
+
+const Molduras: React.FC = () => { 
+  return (
+    <div className="main-content">
+      <h1 className="text-white fw-bold display-5">
+        Bienvenidos a AdoptaPet 🐾
+      </h1>
+      <p className="lead text-white">
+        Conoce, adopta y da amor a tu nuevo mejor amigo.
+      </p>
+    </div>
+  );
+};
+
+export default Molduras;

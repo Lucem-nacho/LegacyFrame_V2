@@ -1,6 +1,11 @@
 import { Routes, Route, Link } from "react-router-dom";
 import Home from "./Pages/Home";
 import Contacto from "./Pages/Contacto";
+import Registro from "./Pages/Registro";
+import Login from "./Pages/Login";
+import Molduras from "./Pages/Molduras";
+import Cuadros from "./Pages/cuadros";
+import Nosotros from "./Pages/Nosotros";
 
 function App() {
   return (
@@ -20,13 +25,33 @@ function App() {
                 <Link className="nav-link" to="/"> Home</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/nosotros">
-                  Nosotros
-                </Link>                
-              </li>
-              <li className="nav-item">
                 <Link className="nav-link" to="/contacto">
                   Contacto
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/registro">
+                  Registro
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/Nosotros">
+                  Nosotros
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/Login">
+                  Login
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/Molduras">
+                  Molduras
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/Cuadros">
+                  Cuadros
                 </Link>
               </li>
             </ul>
@@ -39,6 +64,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/contacto" element={<Contacto />} />
+          <Route path="/registro" element={<Registro />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/molduras" element={<Molduras />} />
+          <Route path="/cuadros" element={<Cuadros />} />
+          <Route path="/nosotros" element={<Nosotros />} />
         </Routes>
       </div>
 
