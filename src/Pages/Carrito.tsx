@@ -1,14 +1,13 @@
 import React from "react";
 
-const Carrito: React.FC = () => { // Declara un componente funcional llamado Home, significa React Functional Component, y le dice a TypeScript que Home es un componente de React.
+const Carrito: React.FC = () => {
   return (
-    <div className="main-content">
-      <h1 className="text-white fw-bold display-5">
-        Bienvenidos a AdoptaPet 🐾
+    <div className="container py-5">
+      <h1 className="h3 mb-3">
+        <i className="fas fa-shopping-cart me-2"></i>
+        Carrito
       </h1>
-      <p className="lead text-white">
-        Conoce, adopta y da amor a tu nuevo mejor amigo.
-      </p>
+      <div className="alert alert-info">Próximamente: detalle del carrito global.</div>
     </div>
   );
 };

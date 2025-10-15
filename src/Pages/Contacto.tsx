@@ -21,7 +21,7 @@ import React, { useState } from "react"; //permite manejar valores dinámicos, c
       <p className="lead text-white mb-4">
         Completa el formulario y nos pondremos en contacto contigo.
       </p>
-      <form onSubmit={handleSubmit} className="w-100" style={{ maxWidth: "500px" }}>
+  <form onSubmit={handleSubmit} className="w-100 form-max-500">
         <div className="mb-3">
           <label htmlFor="nombre" className="form-label text-white">
             Nombre

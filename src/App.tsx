@@ -1,69 +1,19 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Home from "./Pages/Home";
 import Contacto from "./Pages/Contacto";
 import Registro from "./Pages/Registro";
 import Login from "./Pages/Login";
 import Molduras from "./Pages/Molduras";
-import Cuadros from "./Pages/cuadros";
-import Nosotros from "./Pages/Nosotros";
+import Cuadros from "./Pages/Cuadros";
 import Carrito from "./Pages/Carrito";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 function App() {
   return (
     <div className="app-container">
       {/* NAVBAR */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary fixed-top w-100 shadow">
-        <div className="container-fluid">
-          <Link className="navbar-brand fw-bold" to="/">
-            AdoptaPet
-          </Link>
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav ms-auto">
-              <li className="nav-item">
-                <Link className="nav-link" to="/"> Home</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/contacto">
-                  Contacto
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/registro">
-                  Registro
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/Nosotros">
-                  Nosotros
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/Login">
-                  Login
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/Molduras">
-                  Molduras
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/Cuadros">
-                  Cuadros
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/carrito">
-                  Carrito
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* CONTENIDO PRINCIPAL */}
       <div className="main-content">
@@ -74,15 +24,51 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/molduras" element={<Molduras />} />
           <Route path="/cuadros" element={<Cuadros />} />
-          <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/carrito" element={<Carrito />} />
         </Routes>
       </div>
 
       {/* FOOTER */}
-      <footer className="footer text-center py-3 bg-primary text-white">
-        © 2025 AdoptaPet - Todos los derechos reservados
-      </footer>
+      <Footer />
+
+      {/* Carrito Offcanvas */}
+      <div className="offcanvas offcanvas-end" tabIndex={-1} id="carritoOffcanvas" aria-labelledby="carritoOffcanvasLabel">
+        <div className="offcanvas-header">
+          <h5 className="offcanvas-title" id="carritoOffcanvasLabel">
+            <i className="fas fa-shopping-cart me-2"></i>Mi Carrito
+          </h5>
+          <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div className="offcanvas-body">
+          <div id="carritoVacio" className="text-center py-5">
+            <i className="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+            <h6 className="text-muted">Tu carrito está vacío</h6>
+            <p className="text-muted small">Agrega productos para comenzar tu compra</p>
+          </div>
+          
+          <div id="carritoContenido" className="d-none">
+            <div id="itemsCarrito"></div>
+            
+            <hr />
+            
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <strong>Total: $<span id="totalCarrito">0</span></strong>
+              <button id="vaciarCarrito" className="btn btn-outline-danger btn-sm">
+                <i className="fas fa-trash me-1"></i>Vaciar
+              </button>
+            </div>
+            
+            <div className="d-grid gap-2">
+              <button id="procederCompra" className="btn btn-success">
+                <i className="fas fa-credit-card me-2"></i>Proceder al Pago
+              </button>
+              <button className="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
+                Seguir Comprando
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

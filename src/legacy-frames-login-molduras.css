@@ -1,0 +1,505 @@
+/* LEGACY FRAMES - ESTILO PROFESIONAL */
+
+:root {
+    --primary-color: #8B5C2A;
+    --secondary-color: #A6784E;
+    --accent-color: #D4A574;
+    --dark-color: #5C3A1A;
+    --light-bg: #FAF8F5;
+    --text-dark: #2c3e50;
+    --text-light: #6c757d;
+    --shadow: 0 4px 15px rgba(0,0,0,0.1);
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: #fafafa;
+}
+
+/* Navegación */
+.navbar {
+    background-color: white !important;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: var(--shadow);
+    padding: 15px 20px;
+}
+
+.navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--primary-color) !important;
+    text-decoration: none;
+}
+
+.navbar .navbar-brand img {
+    margin-right: 12px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+/* Tamaño de logo en navbar */
+.logo-brand {
+    width: 100px;
+    height: auto;
+}
+
+.navbar .nav-link {
+    color: var(--text-dark) !important;
+    font-weight: 500;
+    padding: 8px 16px !important;
+    margin: 0 5px;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.navbar .nav-link:hover, .navbar .nav-link.active {
+    background-color: var(--accent-color);
+    color: white !important;
+    transform: translateY(-1px);
+}
+
+.navbar .dropdown-menu {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.navbar .dropdown-item {
+    color: var(--text-dark) !important;
+    padding: 10px 20px;
+    transition: var(--transition);
+}
+
+.navbar .dropdown-item:hover, .navbar .dropdown-item.active {
+    background-color: var(--accent-color);
+    color: white !important;
+}
+
+/* Container empresa */
+.empresa-container {
+    max-width: 900px;
+    margin: 60px auto;
+    background: white;
+    padding: 50px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    position: relative;
+}
+
+.empresa-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+}
+
+/* Header empresa */
+.empresa-header {
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--primary-color);
+}
+
+.empresa-header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    color: var(--primary-color);
+}
+
+.empresa-header .lead {
+    font-size: 1.2rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+/* Banner principal image */
+.banner-img {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+}
+
+/* Características */
+.caracteristica {
+    background: var(--light-bg);
+    padding: 30px;
+    margin-bottom: 25px;
+    border-radius: var(--border-radius);
+    border-left: 5px solid var(--primary-color);
+    transition: var(--transition);
+}
+
+.caracteristica:hover {
+    transform: translateX(5px);
+    box-shadow: var(--shadow);
+}
+
+.caracteristica h5 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.caracteristica p {
+    color: var(--text-dark);
+    margin-bottom: 0;
+}
+
+/* Números destacados */
+.numero-destacado {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 10px;
+}
+
+/* Cuadros */
+.cuadro-card {
+    transition: var(--transition);
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.cuadro-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+}
+
+.cuadro-card .card-img-top {
+    transition: var(--transition);
+}
+
+.cuadro-card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+.precio-destacado {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-color) !important;
+    margin: 15px 0;
+}
+
+/* Títulos de sección heredando color principal */
+.section-title {
+    color: var(--primary-color);
+}
+
+/* Miniaturas de producto en Home destacados */
+.product-thumb {
+    width: 100%;
+    max-width: 200px;
+    height: 150px;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+/* Carousel imágenes */
+.carousel-img {
+    height: 400px;
+    object-fit: cover;
+}
+
+/* Imagen de tarjetas uniforme */
+.card-img-cover {
+    height: 250px;
+    object-fit: cover;
+}
+
+/* ===== Molduras (catálogo) ===== */
+.filter-section {
+    border: 1px solid #eee;
+}
+
+.product-card {
+    border: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition);
+    background: #fff;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.15);
+}
+
+.product-image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+    transition: transform .3s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.05);
+}
+
+.product-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+}
+
+.product-card:hover .product-overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+.product-info {
+    padding: 16px;
+}
+
+.product-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-dark);
+}
+
+.product-price {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.info-section {
+    border: 1px solid #eee;
+}
+
+.modal-img {
+    max-height: 400px;
+    object-fit: contain;
+}
+
+/* Formularios */
+.form-max-500 {
+    max-width: 500px;
+}
+
+.product-actions {
+    gap: 8px;
+}
+
+.product-actions .btn {
+    border-radius: 25px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.product-actions .btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Call to Action */
+.cta-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+    animation: float 20s infinite linear;
+}
+
+@keyframes float {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(135deg, var(--dark-color), var(--primary-color));
+    color: white;
+    padding: 50px 0 20px 0;
+    margin-top: 80px;
+}
+
+.footer-title {
+    color: var(--accent-color);
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--accent-color);
+    display: inline-block;
+    padding-bottom: 8px;
+}
+
+.footer-text {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.footer-location {
+    display: flex;
+    align-items: center;
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.footer-location i {
+    margin-right: 10px;
+    font-size: 1.1rem;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 10px;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: var(--transition);
+    display: block;
+    padding: 5px 0;
+}
+
+.footer-links a:hover {
+    color: var(--accent-color);
+    padding-left: 10px;
+}
+
+.footer-contact .contact-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-contact .contact-item i {
+    margin-right: 12px;
+    color: var(--accent-color);
+    width: 20px;
+}
+
+.footer-social .social-link {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: var(--transition);
+    padding: 8px 0;
+}
+
+.footer-social .social-link:hover {
+    color: var(--accent-color);
+    transform: translateX(5px);
+}
+
+.footer-social .social-link i {
+    margin-right: 10px;
+    width: 20px;
+}
+
+.footer-divider {
+    border-color: rgba(255, 255, 255, 0.2);
+    margin: 30px 0 20px 0;
+}
+
+.footer-copyright {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .empresa-container {
+        margin: 30px auto;
+        padding: 30px 20px;
+    }
+    
+    .empresa-header h1 {
+        font-size: 2.2rem;
+    }
+    
+    .numero-destacado {
+        font-size: 2.5rem;
+    }
+    
+    .caracteristica {
+        padding: 20px;
+    }
+}
+
+/* App specific styles */
+.app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+}
+
+/* Bootstrap overrides */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-color);
+    border-color: var(--dark-color);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
