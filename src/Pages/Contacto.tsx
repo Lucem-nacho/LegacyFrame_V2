@@ -16,14 +16,15 @@ import React, { useState } from "react"; //permite manejar valores dinámicos, c
   };
 
   return (
-    <div className="main-content">
-      <h1 className="text-white fw-bold display-5 mb-3">Contacto 📬</h1>
-      <p className="lead text-white mb-4">
+    <div className="contact-page-container">
+      <div className="text-center">
+      <h1 className="fw-bold display-5 mb-3">Contacto 📬</h1>
+      <p className="lead mb-4">
         Completa el formulario y nos pondremos en contacto contigo.
       </p>
-  <form onSubmit={handleSubmit} className="w-100 form-max-500">
+  <form onSubmit={handleSubmit} className="w-100 form-max-500 text-start">
         <div className="mb-3">
-          <label htmlFor="nombre" className="form-label text-white">
+          <label htmlFor="nombre" className="form-label">
             Nombre
           </label>
           <input
@@ -36,7 +37,7 @@ import React, { useState } from "react"; //permite manejar valores dinámicos, c
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="email" className="form-label text-white">
+          <label htmlFor="email" className="form-label">
             Email
           </label>
           <input
@@ -49,7 +50,7 @@ import React, { useState } from "react"; //permite manejar valores dinámicos, c
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="mensaje" className="form-label text-white">
+          <label htmlFor="mensaje" className="form-label">
             Mensaje
           </label>
           <textarea
@@ -65,6 +66,7 @@ import React, { useState } from "react"; //permite manejar valores dinámicos, c
           Enviar
         </button>
       </form>
+      </div>
     </div>
   );
 };

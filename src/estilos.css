@@ -305,3 +305,126 @@ body {
         font-size: 2.5rem;
     }
 }
+
+
+
+/* PÁGINA DE REGISTRO  */
+.register-page-container {
+  background-image: url('https://images.unsplash.com/photo-1517842645767-c6f90405774b?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  min-height: calc(100vh - 120px); /* Ajusta la altura para que no quede cubierto por el footer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.register-card-header {
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.register-card-header h2 {
+  color: var(--primary-color);
+}
+
+.register-card-body {
+  padding: 2rem;
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  display: block; /* Bootstrap a veces lo oculta, nos aseguramos que se vea */
+  color: #dc3545;
+  font-size: 0.875em;
+}
+
+.register-card .btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.register-card .btn-primary:hover {
+  background-color: var(--dark-color);
+  border-color: var(--dark-color);
+}
+
+
+/* INDICADOR DE CONTRASEÑA */
+
+.password-strength-indicator ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.password-strength-indicator li {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  transition: color 0.3s ease-in-out;
+}
+
+.password-strength-indicator li .fas {
+  width: 18px; /* Alinea los iconos */
+}
+
+
+/*  PÁGINA DE LOGIN  */
+
+.login-page-container {
+  background-image: url('https://images.unsplash.com/photo-1593344484962-796b931a8a33?q=80&w=1932&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.login-card-header {
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.login-card-header h2 {
+  color: var(--primary-color);
+}
+
+.login-card-body {
+  padding: 2rem;
+}
+
+.login-card .btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.login-card .btn-primary:hover {
+  background-color: var(--dark-color);
+  border-color: var(--dark-color);
+}
