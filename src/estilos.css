@@ -1,0 +1,307 @@
+/* LEGACY FRAMES - ESTILO PROFESIONAL (CORREGIDO) */
+
+:root {
+    --primary-color: #8B5C2A;
+    --secondary-color: #A6784E;
+    --accent-color: #D4A574;
+    --dark-color: #5C3A1A;
+    --light-bg: #FAF8F5;
+    --text-dark: #2c3e50;
+    --text-light: #6c757d;
+    --shadow: 0 4px 15px rgba(0,0,0,0.1);
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: #fafafa;
+}
+
+
+.navbar {
+    background-color: var(--primary-color) !important; 
+    border-bottom: 3px solid var(--dark-color);      
+    box-shadow: var(--shadow);
+    padding: 15px 20px;
+}
+
+.navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #ffffff !important;
+    text-decoration: none;
+}
+
+.navbar .navbar-brand img {
+    margin-right: 12px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.logo-brand {
+    width: 100px;
+    height: auto;
+}
+
+.navbar .nav-link {
+    color: #ffffff !important;
+    font-weight: 500;
+    padding: 8px 16px !important;
+    margin: 0 5px;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.navbar .nav-link:hover, .navbar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+.navbar .dropdown-menu {
+    background-color: var(--secondary-color);
+    border: none;
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.navbar .dropdown-item {
+    color: #ffffff !important;
+    padding: 10px 20px;
+    transition: var(--transition);
+}
+
+.navbar .dropdown-item:hover, .navbar .dropdown-item.active {
+    background-color: var(--accent-color);
+    color: #ffffff !important;
+}
+
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+}
+
+.form-max-500 {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.banner-img {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: cover;
+}
+
+.empresa-container {
+    background-color: #fff;
+    padding: 40px 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin: -80px auto 50px auto;
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+}
+
+.empresa-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.empresa-header h1 {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.caracteristica {
+    padding: 20px;
+}
+
+.product-thumb {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    box-shadow: var(--shadow);
+}
+
+.section-title {
+    font-weight: 700;
+    color: var(--dark-color);
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: var(--accent-color);
+}
+
+.numeros-empresa .numero-destacado {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.cta-section {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+}
+
+.modal-img {
+    max-height: 400px;
+    width: auto;
+    border-radius: var(--border-radius);
+}
+
+/* Footer */
+.footer {
+    background-color: var(--dark-color); /* Usamos el color café más oscuro */
+    color: #adb5bd; /* Texto principal más sutil */
+    padding: 50px 0 20px 0;
+}
+
+.footer-title {
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 1rem;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.footer-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background-color: var(--accent-color);
+}
+
+.footer-text, .footer-location span {
+    color: #adb5bd;
+}
+
+.footer-location {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.footer-location i {
+    margin-right: 10px;
+    color: var(--accent-color);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links a {
+    color: #adb5bd;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 12px;
+    transition: var(--transition);
+}
+
+.footer-links a:hover {
+    color: #ffffff; /* Blanco al pasar el mouse */
+    transform: translateX(5px);
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.contact-item i {
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    color: var(--accent-color);
+}
+
+.footer-social .social-link {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: #adb5bd;
+    text-decoration: none;
+    transition: var(--transition);
+    padding: 8px 0;
+    border-radius: 4px;
+}
+
+.footer-social .social-link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.footer-social .social-link i {
+    margin-right: 10px;
+    width: 20px;
+}
+
+.footer-divider {
+    border: none;
+    height: 1px;
+    /* Efecto de degradado como en tu página original */
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+    margin: 30px 0 20px 0;
+}
+
+.footer-copyright {
+    color: #8f9a9d;
+    font-size: 0.9rem;
+    margin: 0;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .empresa-container {
+        margin: 30px auto;
+        padding: 30px 20px;
+    }
+    
+    .empresa-header h1 {
+        font-size: 2.2rem;
+    }
+    
+    .numero-destacado {
+        font-size: 2.5rem;
+    }
+}

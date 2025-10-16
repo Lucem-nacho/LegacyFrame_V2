@@ -8,6 +8,7 @@ import Cuadros from "./Pages/Cuadros";
 import Carrito from "./Pages/Carrito";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import './estilos.css';
 
 function App() {
   return (

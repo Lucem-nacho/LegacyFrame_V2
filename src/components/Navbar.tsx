@@ -3,8 +3,8 @@ import logo from '../assets/logo.png';
 
 const Navbar = () => {
   return (
-    <nav className="navbar navbar-expand-lg bg-body-tertiary">
-      <div className="container-fluid">
+    <nav className="navbar navbar-expand-lg">
+      <div className="container-fluid"> 
         <Link className="navbar-brand" to="/">
           <img className="logo-brand" src={logo} alt="Legacy Frames" />
         </Link>
@@ -48,7 +48,7 @@ const Navbar = () => {
           <div className="d-flex align-items-center">
             {/* Carrito */}
             <button 
-              className="btn btn-outline-dark me-2 position-relative btn-carrito" 
+              className="btn btn-outline-light me-2 position-relative btn-carrito" 
               type="button" 
               data-bs-toggle="offcanvas" 
               data-bs-target="#carritoOffcanvas" 
@@ -63,10 +63,10 @@ const Navbar = () => {
               </span>
             </button>
             <span id="navbarAuthArea" className="d-flex align-items-center">
-              <Link className="btn btn-outline-dark me-2" to="/registro">
+              <Link className="btn btn-outline-light me-2" to="/registro">
                 <i className="fas fa-user-plus me-1"></i>Registro
               </Link>
-              <Link className="btn btn-dark" to="/login">
+              <Link className="btn btn-light" to="/login">
                 <i className="fas fa-sign-in-alt me-1"></i>Ingresar
               </Link>
             </span>
