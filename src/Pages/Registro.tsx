@@ -16,7 +16,8 @@ const Registro = () => {
     terms: false,
   });
 
-  const [errors, setErrors] = useState<any>({});
+  type Errors = Partial<Record<keyof typeof formData | 'password' | 'confirmPassword' | 'terms' | 'email', string>>;
+  const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState(false);
   
   // Estado para la validación de la contraseña en tiempo real
@@ -48,8 +49,8 @@ const Registro = () => {
   };
 
   // Valida el formulario completo
-  const validateForm = () => {
-    const newErrors: any = {};
+  const validateForm = (): boolean => {
+    const newErrors: Errors = {};
     if (!formData.nombre) newErrors.nombre = 'El nombre es obligatorio.';
     if (!formData.apellido) newErrors.apellido = 'El apellido es obligatorio.';
     if (!formData.email) newErrors.email = 'El email es obligatorio.';

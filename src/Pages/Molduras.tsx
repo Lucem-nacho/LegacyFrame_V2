@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useCart } from "../context/CartContext";
 // Sustituimos imágenes faltantes por equivalentes existentes
 import moldura3 from "../assets/moldura3.jpg";
 import moldura4 from "../assets/moldura4.jpg";
@@ -26,6 +27,7 @@ interface Product {
 const CLP = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
 
 const Molduras = () => {
+  const { addItem } = useCart();
   const [category, setCategory] = useState<Category>("all");
   const [modalData, setModalData] = useState<null | {
     name: string;
@@ -151,6 +153,20 @@ const Molduras = () => {
 
   const formatRange = (from: number, to: number) => `${CLP.format(from)} - ${CLP.format(to)}`;
 
+  const openCart = () => {
+    const offEl = document.getElementById("carritoOffcanvas");
+    if (offEl) {
+      // @ts-expect-error - Bootstrap JS está disponible globalmente
+      const off = new window.bootstrap.Offcanvas(offEl);
+      off.show();
+    }
+  };
+
+  const addToCart = (p: Product) => {
+    addItem({ id: p.id, name: p.name, image: p.image, priceText: formatRange(p.priceFrom, p.priceTo) }, 1);
+    openCart();
+  };
+
   const openModal = (p: Product) => {
     const price = formatRange(p.priceFrom, p.priceTo);
     const whatsappMsg = `Hola, me interesa la moldura ${p.name}. ¿Podrían darme más información?`;
@@ -241,7 +257,7 @@ const Molduras = () => {
                   >
                     <i className="fab fa-whatsapp"></i> Consultar
                   </a>
-                  <button className="btn btn-primary btn-sm agregar-carrito">
+                  <button className="btn btn-primary btn-sm agregar-carrito" onClick={() => addToCart(p)}>
                     <i className="fas fa-cart-plus me-1"></i> Agregar
                   </button>
                 </div>

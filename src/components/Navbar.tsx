@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { useCart } from '../context/CartContext';
 
 const Navbar = () => {
+  const { count } = useCart();
   return (
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid"> 
@@ -55,12 +57,13 @@ const Navbar = () => {
               aria-controls="carritoOffcanvas"
             >
               <i className="fas fa-shopping-cart"></i>
-              <span 
-                id="contadorCarrito" 
-                className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"
-              >
-                0
-              </span>
+              {count > 0 && (
+                <span 
+                  className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                >
+                  {count}
+                </span>
+              )}
             </button>
             <span id="navbarAuthArea" className="d-flex align-items-center">
               <Link className="btn btn-outline-dark me-2" to="/registro">

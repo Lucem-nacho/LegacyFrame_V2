@@ -8,9 +8,10 @@ import Cuadros from "./Pages/Cuadros";
 import Carrito from "./Pages/Carrito";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import './estilos.css';
+import { useCart } from "./context/CartContext";
 
 function App() {
+  const { items, total, clear, removeItem } = useCart();
   return (
     <div className="app-container">
       {/* NAVBAR */}
@@ -41,33 +42,53 @@ function App() {
           <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div className="offcanvas-body">
-          <div id="carritoVacio" className="text-center py-5">
-            <i className="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-            <h6 className="text-muted">Tu carrito está vacío</h6>
-            <p className="text-muted small">Agrega productos para comenzar tu compra</p>
-          </div>
-          
-          <div id="carritoContenido" className="d-none">
-            <div id="itemsCarrito"></div>
-            
-            <hr />
-            
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <strong>Total: $<span id="totalCarrito">0</span></strong>
-              <button id="vaciarCarrito" className="btn btn-outline-danger btn-sm">
-                <i className="fas fa-trash me-1"></i>Vaciar
-              </button>
+          {items.length === 0 ? (
+            <div className="text-center py-5">
+              <i className="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+              <h6 className="text-muted">Tu carrito está vacío</h6>
+              <p className="text-muted small">Agrega productos para comenzar tu compra</p>
             </div>
-            
-            <div className="d-grid gap-2">
-              <button id="procederCompra" className="btn btn-success">
-                <i className="fas fa-credit-card me-2"></i>Proceder al Pago
-              </button>
-              <button className="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
-                Seguir Comprando
-              </button>
-            </div>
-          </div>
+          ) : (
+            <>
+              <div className="list-group mb-3">
+                {items.map((it) => (
+                  <div key={it.id} className="list-group-item d-flex align-items-center">
+                    {it.image && (
+                      <img src={it.image} alt={it.name} style={{ width: 48, height: 48, objectFit: 'cover' }} className="me-3 rounded" />
+                    )}
+                    <div className="flex-grow-1">
+                      <div className="fw-semibold">{it.name}</div>
+                      <div className="small text-muted">
+                        {it.priceText ? it.priceText : (it.price ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(it.price) : '')}
+                        {` · x${it.quantity}`}
+                      </div>
+                    </div>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => removeItem(it.id)}>
+                      <i className="fas fa-trash"></i>
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <hr />
+
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <strong>Total: {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(total)}</strong>
+                <button className="btn btn-outline-danger btn-sm" onClick={clear}>
+                  <i className="fas fa-trash me-1"></i>Vaciar
+                </button>
+              </div>
+
+              <div className="d-grid gap-2">
+                <button className="btn btn-success">
+                  <i className="fas fa-credit-card me-2"></i>Proceder al Pago
+                </button>
+                <button className="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
+                  Seguir Comprando
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

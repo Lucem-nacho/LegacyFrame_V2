@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useCart } from '../context/CartContext';
 import framePicture from '../assets/Frame Picture.png';
 import fameProxima from '../assets/fameproxima.png';
 import marcoDoradoClasico from '../assets/marcoDoradoClasico.png';
@@ -18,7 +19,8 @@ interface Product {
 }
 
 const Cuadros = () => {
-  const [carrito, setCarrito] = useState<Product[]>([]);
+  const { addItem } = useCart();
+  const [modalProducto, setModalProducto] = useState<Product | null>(null);
 
   const products: Product[] = [
     {
@@ -69,9 +71,11 @@ const Cuadros = () => {
     
   ];
 
+  
+
   const agregarAlCarrito = (producto: Product) => {
-    setCarrito([...carrito, producto]);
-    alert(`${producto.name} agregado al carrito`);
+    addItem({ id: producto.id, name: producto.name, image: producto.image, price: producto.price }, 1);
+    abrirOffcanvas();
   };
 
   const formatPrice = (price: number) => {
@@ -83,6 +87,15 @@ const Cuadros = () => {
 
   const getWhatsAppUrl = (productName: string) => {
     return `https://api.whatsapp.com/send?phone=56945621740&text=Hola, me interesa el '${productName}'`;
+  };
+
+  const abrirOffcanvas = () => {
+    const offEl = document.getElementById('carritoOffcanvas');
+    if (offEl) {
+      // @ts-expect-error - Bootstrap JS global
+      const off = new window.bootstrap.Offcanvas(offEl);
+      off.show();
+    }
   };
 
   return (
@@ -129,7 +142,21 @@ const Cuadros = () => {
                     <p className="card-text">{product.description}</p>
                     <p className="precio-destacado">Desde {formatPrice(product.price)}</p>
                     <span className={`badge ${product.badgeColor}`}>{product.badge}</span>
-                    <div className="d-flex justify-content-between align-items-center mt-3 product-actions">
+                    <div className="d-flex flex-wrap gap-2 mt-3 product-actions">
+                      <button 
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => {
+                          setModalProducto(product);
+                          const el = document.getElementById('cuadroModal');
+                          if (el) {
+                            // @ts-expect-error - Bootstrap JS global
+                            const modal = new window.bootstrap.Modal(el);
+                            modal.show();
+                          }
+                        }}
+                      >
+                        <i className="fas fa-eye me-1"></i> Ver detalles
+                      </button>
                       <a 
                         href={getWhatsAppUrl(product.name)} 
                         className="btn btn-success btn-sm me-2"
@@ -186,14 +213,49 @@ const Cuadros = () => {
         </div>
       </div>
 
-      {/* Información del carrito */}
-      {carrito.length > 0 && (
-        <div className="container mb-4">
-          <div className="alert alert-info">
-            <strong>Carrito:</strong> {carrito.length} productos agregados
+      {/* Modal de producto (Bootstrap) */}
+      <div className="modal fade" id="cuadroModal" tabIndex={-1}>
+        <div className="modal-dialog modal-lg">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">{modalProducto?.name || ''}</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div className="modal-body text-center">
+              {modalProducto && (
+                <>
+                  <img src={modalProducto.image} className="img-fluid mb-3 modal-img" alt={modalProducto.name} />
+                  <h4>{modalProducto.name}</h4>
+                  <p className="fs-5 text-primary fw-bold">{formatPrice(modalProducto.price)}</p>
+                  <p className="text-muted">{modalProducto.description}</p>
+                </>
+              )}
+            </div>
+            <div className="modal-footer">
+              {modalProducto && (
+                <>
+                  <a 
+                    href={getWhatsAppUrl(modalProducto.name)} 
+                    className="btn btn-success" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <i className="fab fa-whatsapp"></i> Consultar por WhatsApp
+                  </a>
+                  <button
+                    className="btn btn-primary"
+                    data-bs-dismiss="modal"
+                    onClick={() => { addItem({ id: modalProducto.id, name: modalProducto.name, image: modalProducto.image, price: modalProducto.price }, 1); abrirOffcanvas(); }}
+                  >
+                    <i className="fas fa-cart-plus me-1"></i> Agregar al carrito
+                  </button>
+                </>
+              )}
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

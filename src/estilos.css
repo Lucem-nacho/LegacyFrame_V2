@@ -180,6 +180,59 @@ body {
     border-radius: var(--border-radius);
 }
 
+/* === Ajustes de imágenes (tamaños más pequeños y consistentes) === */
+/* Carrusel de Cuadros */
+.carousel-img {
+    max-height: 360px;
+    width: 100%;
+    object-fit: cover;
+}
+
+/* Imagen de tarjeta en Cuadros */
+.card-img-cover {
+    height: 220px;
+    width: 100%;
+    object-fit: cover;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+}
+
+/* Tarjetas de Molduras */
+.product-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.product-image-container {
+    position: relative;
+    height: 200px; /* tamaño pequeño y uniforme */
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* recorta manteniendo proporción */
+    display: block;
+}
+
+.product-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.35);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.product-image-container:hover .product-overlay {
+    opacity: 1;
+}
+
 /* Footer */
 .footer {
     background-color: var(--dark-color); /* Usamos el color café más oscuro */
