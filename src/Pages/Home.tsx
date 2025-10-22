@@ -1,10 +1,69 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useCart } from '../context/CartContext';
+import ProductDetailModal from '../components/ProductDetailModal';
 import moldura3 from '../assets/moldura3.jpg';
 import moldura4 from '../assets/moldura4.jpg';
 import rustica1 from '../assets/rustica1.jpg';
 import framePicture from '../assets/Frame Picture.png';
 
+type Featured = { id: string; name: string; image: string; price: number; description: string };
+
+const CLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' });
+const FEATURED_PRICE = 20000;
+
 const Home = () => {
+  const { addItem } = useCart();
+  const [modalProducto, setModalProducto] = useState<Featured | null>(null);
+
+  const featuredProducts: Featured[] = [
+    {
+      id: 'dest-1',
+      name: 'I 09 Greca ZO',
+      image: moldura3,
+      price: FEATURED_PRICE,
+      description:
+        'Moldura greca clásica con diseño tradicional ZO, perfecta para fotografías familiares y documentos importantes.',
+    },
+    {
+      id: 'dest-2',
+      name: 'I 09 Greca Corazón',
+      image: moldura4,
+      price: FEATURED_PRICE,
+      description:
+        'Elegante moldura greca con motivo de corazón, ideal para fotografías románticas y recuerdos especiales.',
+    },
+    {
+      id: 'dest-3',
+      name: 'H 20 Albayalde Azul',
+      image: rustica1,
+      price: FEATURED_PRICE,
+      description:
+        'Moldura rústica premium con acabado albayalde azul, perfecta para obras de arte y fotografías especiales.',
+    },
+  ];
+
+  const abrirOffcanvas = () => {
+    const offEl = document.getElementById('carritoOffcanvas');
+    if (offEl) {
+      const off = (window as any).bootstrap ? new (window as any).bootstrap.Offcanvas(offEl) : null;
+      off?.show();
+    }
+  };
+
+  const verDetalles = (p: Featured) => {
+    setModalProducto(p);
+    const el = document.getElementById('featuredModal');
+    if (el) {
+      const modal = (window as any).bootstrap ? new (window as any).bootstrap.Modal(el) : null;
+      modal?.show();
+    }
+  };
+
+  const agregarAlCarrito = (p: Featured) => {
+    addItem({ id: p.id, name: p.name, image: p.image, price: p.price }, 1);
+    abrirOffcanvas();
+  };
   return (
     <div>
       {/* Banner Principal */}
@@ -24,33 +83,27 @@ const Home = () => {
             <div className="col-12">
               <h2 className="text-center mb-4 section-title">Nuestros Productos Más Populares</h2>
               <div className="row g-4">
-                <div className="col-md-4">
-                  <div className="caracteristica text-center">
-                    <img className="product-thumb" src={moldura3} alt="I 09 greca zo" />
-                    <h5>I 09 Greca ZO</h5>
-                    <p className="mb-2">Moldura greca clásica con diseño tradicional ZO, perfecta para fotografías familiares y documentos importantes.</p>
-                    <p className="precio-destacado">$10.000 - $65.000</p>
-                    <span className="badge bg-success">Más Vendido</span>
+                {featuredProducts.map((p, idx) => (
+                  <div key={p.id} className="col-md-4">
+                    <div className="caracteristica text-center">
+                      <img className="product-thumb" src={p.image} alt={p.name} />
+                      <h5>{p.name}</h5>
+                      <p className="mb-2">{p.description}</p>
+                      <p className="precio-destacado">{CLP.format(p.price)}</p>
+                      <div className="d-flex justify-content-center gap-2 mt-2">
+                        <button className="btn btn-outline-secondary btn-sm" onClick={() => verDetalles(p)}>
+                          <i className="fas fa-eye me-1"></i> Ver detalles
+                        </button>
+                        <button className="btn btn-primary btn-sm" onClick={() => agregarAlCarrito(p)}>
+                          <i className="fas fa-cart-plus me-1"></i> Agregar
+                        </button>
+                      </div>
+                      {idx === 0 && <span className="badge bg-success mt-2">Más Vendido</span>}
+                      {idx === 1 && <span className="badge bg-info mt-2">Tendencia</span>}
+                      {idx === 2 && <span className="badge bg-warning mt-2">Premium</span>}
+                    </div>
                   </div>
-                </div>
-                <div className="col-md-4">
-                  <div className="caracteristica text-center">
-                    <img className="product-thumb" src={moldura4} alt="I 09 greca corazón" />
-                    <h5>I 09 Greca Corazón</h5>
-                    <p className="mb-2">Elegante moldura greca con motivo de corazón, ideal para fotografías románticas y recuerdos especiales.</p>
-                    <p className="precio-destacado">$10.000 - $70.000</p>
-                    <span className="badge bg-info">Tendencia</span>
-                  </div>
-                </div>
-                <div className="col-md-4">
-                  <div className="caracteristica text-center">
-                    <img className="product-thumb" src={rustica1} alt="H 20 albayalde azul" />
-                    <h5>H 20 Albayalde Azul</h5>
-                    <p className="mb-2">Moldura rústica premium con acabado albayalde azul, perfecta para obras de arte y fotografías especiales.</p>
-                    <p className="precio-destacado">$10.000 - $130.000</p>
-                    <span className="badge bg-warning">Premium</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -170,8 +223,28 @@ const Home = () => {
           </div>
         </div>
       </section>
+      <ProductDetailModal
+        id="featuredModal"
+        product={
+          modalProducto && {
+            name: modalProducto.name,
+            image: modalProducto.image,
+            description: modalProducto.description,
+            price: modalProducto.price,
+            whatsappHref:
+              'https://wa.me/56912345678?text=' +
+              encodeURIComponent(
+                `Hola, me interesa ${modalProducto.name} (${CLP.format(modalProducto.price)})`
+              ),
+          }
+        }
+        onAddToCart={() => {
+          if (modalProducto) agregarAlCarrito(modalProducto);
+        }}
+      />
     </div>
   );
 };
 
 export default Home;
+declare global { interface Window { bootstrap: any } }

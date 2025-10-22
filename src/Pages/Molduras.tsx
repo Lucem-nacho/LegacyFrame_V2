@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useCart } from "../context/CartContext";
+import ProductDetailModal from "../components/ProductDetailModal";
 // Sustituimos imágenes faltantes por equivalentes existentes
 import moldura3 from "../assets/moldura3.jpg";
 import moldura4 from "../assets/moldura4.jpg";
@@ -25,6 +26,8 @@ interface Product {
 }
 
 const CLP = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
+// Precio único para todas las molduras (ajústalo si quieres otro valor)
+const SINGLE_PRICE = 20000;
 
 const Molduras = () => {
   const { addItem } = useCart();
@@ -36,14 +39,15 @@ const Molduras = () => {
     description: string;
     whatsappHref: string;
   }>(null);
+  const [selectedProduct, setSelectedProduct] = useState<null | Product>(null);
 
   const products: Product[] = useMemo(
     () => [
       {
         id: "greca-zo",
         name: "I 09 greca zo",
-        priceFrom: 10000,
-        priceTo: 65000,
+        priceFrom: SINGLE_PRICE,
+        priceTo: SINGLE_PRICE,
   image: moldura3,
         description:
           "Elegante greca decorativa con diseño tradicional ZO. Ideal para marcos clásicos.",
@@ -55,8 +59,8 @@ const Molduras = () => {
       {
         id: "greca-corazon",
         name: "I 09 greca corazón",
-        priceFrom: 10000,
-        priceTo: 70000,
+        priceFrom: SINGLE_PRICE,
+        priceTo: SINGLE_PRICE,
   image: moldura4,
         description:
           "Hermosa greca con motivo de corazón, perfecta para marcos románticos.",
@@ -68,8 +72,8 @@ const Molduras = () => {
       {
         id: "greca-oro",
         name: "P 15 greca LA oro",
-        priceFrom: 10000,
-        priceTo: 38000,
+        priceFrom: SINGLE_PRICE,
+        priceTo: SINGLE_PRICE,
         image: moldura3,
         description: "Greca con acabado dorado, elegante y sofisticada.",
         category: "grecas",
@@ -80,8 +84,8 @@ const Molduras = () => {
       {
         id: "greca-plata",
         name: "P 15 greca LA plata",
-        priceFrom: 10000,
-        priceTo: 105000,
+        priceFrom: SINGLE_PRICE,
+        priceTo: SINGLE_PRICE,
         image: moldura4,
         description: "Greca con acabado plateado, moderna y elegante.",
         category: "grecas",
@@ -92,8 +96,8 @@ const Molduras = () => {
       {
         id: "rustica-azul",
         name: "H 20 albayalde azul",
-        priceFrom: 10000,
-        priceTo: 130000,
+        priceFrom: SINGLE_PRICE,
+        priceTo: SINGLE_PRICE,
         image: rustica1,
         description:
           "Moldura rústica con acabado albayalde azul, ideal para ambientes campestres.",
@@ -105,8 +109,8 @@ const Molduras = () => {
       {
         id: "natural-alerce",
         name: "B-10 t/alerce",
-        priceFrom: 10000,
-        priceTo: 65000,
+        priceFrom: SINGLE_PRICE,
+        priceTo: SINGLE_PRICE,
         image: naturales1,
         description:
           "Moldura natural de alerce con textura original de la madera.",
@@ -118,8 +122,8 @@ const Molduras = () => {
       {
         id: "nativa-j16",
         name: "J-16",
-        priceFrom: 10000,
-        priceTo: 73000,
+        priceFrom: SINGLE_PRICE,
+        priceTo: SINGLE_PRICE,
         image: nativas1,
         description:
           "Moldura de madera nativa chilena, resistente y de gran calidad.",
@@ -131,8 +135,8 @@ const Molduras = () => {
       {
         id: "finger-p12",
         name: "P-12 Finger Joint",
-        priceFrom: 8500,
-        priceTo: 47000,
+        priceFrom: SINGLE_PRICE,
+        priceTo: SINGLE_PRICE,
         image: fingerJoint1,
         description:
           "Moldura finger joint de alta calidad con unión invisible.",
@@ -151,25 +155,35 @@ const Molduras = () => {
     [category, products]
   );
 
-  const formatRange = (from: number, to: number) => `${CLP.format(from)} - ${CLP.format(to)}`;
+  const formatPriceLabel = (from: number, to: number) =>
+    from === to ? CLP.format(from) : `${CLP.format(from)} - ${CLP.format(to)}`;
 
   const openCart = () => {
     const offEl = document.getElementById("carritoOffcanvas");
     if (offEl) {
-      // @ts-expect-error - Bootstrap JS está disponible globalmente
-      const off = new window.bootstrap.Offcanvas(offEl);
-      off.show();
+      const off = (window as any).bootstrap ? new (window as any).bootstrap.Offcanvas(offEl) : null;
+      off?.show();
     }
   };
 
   const addToCart = (p: Product) => {
-    addItem({ id: p.id, name: p.name, image: p.image, priceText: formatRange(p.priceFrom, p.priceTo) }, 1);
+    addItem(
+      {
+        id: p.id,
+        name: p.name,
+        image: p.image,
+        price: p.priceFrom, // precio único numérico para totales
+        priceText: formatPriceLabel(p.priceFrom, p.priceTo),
+      },
+      1
+    );
     openCart();
   };
 
   const openModal = (p: Product) => {
-    const price = formatRange(p.priceFrom, p.priceTo);
+  const price = formatPriceLabel(p.priceFrom, p.priceTo);
     const whatsappMsg = `Hola, me interesa la moldura ${p.name}. ¿Podrían darme más información?`;
+    setSelectedProduct(p);
     setModalData({
       name: p.name,
       image: p.image,
@@ -181,9 +195,8 @@ const Molduras = () => {
     });
     // Mostrar modal con Bootstrap
     const modalEl = document.getElementById("productModal");
-    // @ts-expect-error - window.bootstrap viene del bundle de Bootstrap agregado en index.html
-    const modal = new window.bootstrap.Modal(modalEl);
-    modal.show();
+    const modal = (window as any).bootstrap && modalEl ? new (window as any).bootstrap.Modal(modalEl) : null;
+    modal?.show();
   };
 
   return (
@@ -238,20 +251,18 @@ const Molduras = () => {
             <div className="product-card h-100">
               <div className="product-image-container">
                 <img src={p.image} className="product-image" alt={p.name} />
-                <div className="product-overlay">
-                  <button className="btn btn-light btn-sm" onClick={() => openModal(p)}>
-                    <i className="fas fa-eye"></i> Ver Detalles
-                  </button>
-                </div>
               </div>
               <div className="product-info">
                 <h6 className="product-title">{p.name}</h6>
-                <p className="product-price">{formatRange(p.priceFrom, p.priceTo)}</p>
+                <p className="product-price">{formatPriceLabel(p.priceFrom, p.priceTo)}</p>
                 <span className={`badge ${p.badgeColor}`}>{p.badge}</span>
-                <div className="product-actions mt-2 d-flex justify-content-between align-items-center">
+                <div className="product-actions mt-2 d-flex flex-wrap gap-2">
+                  <button className="btn btn-outline-secondary btn-sm" onClick={() => openModal(p)}>
+                    <i className="fas fa-eye"></i> Ver detalles
+                  </button>
                   <a
                     href={`https://api.whatsapp.com/send?phone=56227916878&text=${encodeURIComponent(p.whatsappText)}`}
-                    className="btn btn-success btn-sm me-2"
+                    className="btn btn-success btn-sm"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -294,35 +305,21 @@ const Molduras = () => {
         </div>
       </div>
 
-      {/* Modal de producto (Bootstrap) */}
-      <div className="modal fade" id="productModal" tabIndex={-1}>
-        <div className="modal-dialog modal-lg">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">{modalData?.name || ""}</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div className="modal-body text-center">
-              {modalData && (
-                <>
-                  <img src={modalData.image} className="img-fluid mb-3 modal-img" alt={modalData.name} />
-                  <h4>{modalData.name}</h4>
-                  <p className="fs-4 text-primary fw-bold">{modalData.price}</p>
-                  <p className="text-muted">{modalData.description}</p>
-                </>
-              )}
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-              {modalData && (
-                <a href={modalData.whatsappHref} className="btn btn-success" target="_blank" rel="noopener noreferrer">
-                  <i className="fab fa-whatsapp"></i> Consultar por WhatsApp
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <ProductDetailModal
+        id="productModal"
+        product={
+          selectedProduct && {
+            name: selectedProduct.name,
+            image: selectedProduct.image,
+            description: selectedProduct.description,
+            priceText: formatPriceLabel(selectedProduct.priceFrom, selectedProduct.priceTo),
+            whatsappHref: modalData?.whatsappHref,
+          }
+        }
+        onAddToCart={() => {
+          if (selectedProduct) addToCart(selectedProduct);
+        }}
+      />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
+import ProductDetailModal from '../components/ProductDetailModal';
 import framePicture from '../assets/Frame Picture.png';
 import fameProxima from '../assets/fameproxima.png';
 import marcoDoradoClasico from '../assets/marcoDoradoClasico.png';
@@ -92,9 +93,8 @@ const Cuadros = () => {
   const abrirOffcanvas = () => {
     const offEl = document.getElementById('carritoOffcanvas');
     if (offEl) {
-      // @ts-expect-error - Bootstrap JS global
-      const off = new window.bootstrap.Offcanvas(offEl);
-      off.show();
+      const off = (window as any).bootstrap ? new (window as any).bootstrap.Offcanvas(offEl) : null;
+      off?.show();
     }
   };
 
@@ -149,9 +149,8 @@ const Cuadros = () => {
                           setModalProducto(product);
                           const el = document.getElementById('cuadroModal');
                           if (el) {
-                            // @ts-expect-error - Bootstrap JS global
-                            const modal = new window.bootstrap.Modal(el);
-                            modal.show();
+                            const modal = (window as any).bootstrap ? new (window as any).bootstrap.Modal(el) : null;
+                            modal?.show();
                           }
                         }}
                       >
@@ -213,49 +212,27 @@ const Cuadros = () => {
         </div>
       </div>
 
-      {/* Modal de producto (Bootstrap) */}
-      <div className="modal fade" id="cuadroModal" tabIndex={-1}>
-        <div className="modal-dialog modal-lg">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">{modalProducto?.name || ''}</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div className="modal-body text-center">
-              {modalProducto && (
-                <>
-                  <img src={modalProducto.image} className="img-fluid mb-3 modal-img" alt={modalProducto.name} />
-                  <h4>{modalProducto.name}</h4>
-                  <p className="fs-5 text-primary fw-bold">{formatPrice(modalProducto.price)}</p>
-                  <p className="text-muted">{modalProducto.description}</p>
-                </>
-              )}
-            </div>
-            <div className="modal-footer">
-              {modalProducto && (
-                <>
-                  <a 
-                    href={getWhatsAppUrl(modalProducto.name)} 
-                    className="btn btn-success" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    <i className="fab fa-whatsapp"></i> Consultar por WhatsApp
-                  </a>
-                  <button
-                    className="btn btn-primary"
-                    data-bs-dismiss="modal"
-                    onClick={() => { addItem({ id: modalProducto.id, name: modalProducto.name, image: modalProducto.image, price: modalProducto.price }, 1); abrirOffcanvas(); }}
-                  >
-                    <i className="fas fa-cart-plus me-1"></i> Agregar al carrito
-                  </button>
-                </>
-              )}
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ProductDetailModal
+        id="cuadroModal"
+        product={
+          modalProducto && {
+            name: modalProducto.name,
+            image: modalProducto.image,
+            description: modalProducto.description,
+            price: modalProducto.price,
+            whatsappHref: getWhatsAppUrl(modalProducto.name),
+          }
+        }
+        onAddToCart={() => {
+          if (modalProducto) {
+            addItem(
+              { id: modalProducto.id, name: modalProducto.name, image: modalProducto.image, price: modalProducto.price },
+              1
+            );
+            abrirOffcanvas();
+          }
+        }}
+      />
     </div>
   );
 };
