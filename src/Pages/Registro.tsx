@@ -171,7 +171,7 @@ const Registro = () => {
                   <div className="form-check mb-4">
                     <input className={`form-check-input ${submitted && errors.terms ? 'is-invalid' : ''}`} type="checkbox" id="terms" name="terms" checked={formData.terms} onChange={handleChange}/>
                     <label className="form-check-label" htmlFor="terms">
-                      Acepto los <Link to="/terminos-y-condiciones" target="_blank">Términos y Condiciones</Link>
+                      Acepto los <Link to="/terminos" target="_blank">Términos y Condiciones</Link>
                     </label>
                     {submitted && errors.terms && (
                       <div className="invalid-feedback d-block">{errors.terms}</div>

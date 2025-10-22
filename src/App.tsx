@@ -9,6 +9,7 @@ import Carrito from "./Pages/Carrito";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { useCart } from "./context/CartContext";
+import Terminos from "./Pages/Terminos";
 
 function App() {
   const { items, total, clear, removeItem } = useCart();
@@ -27,6 +28,7 @@ function App() {
           <Route path="/molduras" element={<Molduras />} />
           <Route path="/cuadros" element={<Cuadros />} />
           <Route path="/carrito" element={<Carrito />} />
+          <Route path="/terminos" element={<Terminos />} />
         </Routes>
       </div>
 

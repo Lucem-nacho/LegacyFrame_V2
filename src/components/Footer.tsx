@@ -15,6 +15,10 @@ const Footer = () => {
               <i className="fas fa-map-marker-alt"></i>
               <span>Departamental 623, Santiago</span>
             </div>
+            <br />
+            <ul className="footer-links">
+              <li><Link to="/terminos">Términos y Condiciones</Link></li>
+            </ul>
           </div>
 
           {/* Navegación */}
