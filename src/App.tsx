@@ -28,13 +28,8 @@ function App() {
   path="/login" 
   element={
     <Login onLoginSuccess={() => {
-      // Aquí pones lo que antes hacías DENTRO del componente Login
       alert('¡Bienvenido! Has iniciado sesión.');
-      // (Aquí podrías, por ejemplo, guardar un token en el futuro)
-      
-      // Y luego rediriges. (Aunque el 'navigate' que dejamos por defecto
-      // en Login.tsx también funcionaría si no pasas esta prop)
-      window.location.href = '/'; // O usa 'navigate' si lo tienes disponible en App.tsx
+      window.location.href = '/'; 
     }} />
   } 
 />

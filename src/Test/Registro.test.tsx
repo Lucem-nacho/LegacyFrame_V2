@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import Registro from '../Pages/Registro';
 
-// --- Configuración de Mocks (Esto estaba bien) ---
+// --- Configuración de Mocks---
 const navigateMock = vi.fn();
 const alertMock = vi.fn();
 
@@ -32,7 +32,7 @@ describe('Registro Component', () => {
     expect(screen.getByLabelText(/acepto los términos y condiciones/i)).toBeInTheDocument();
   });
 
-  // Test 2: Envío de formulario vacío (CORREGIDO)
+  // Test 2: Envío de formulario vacío 
   it('muestra errores de validación si se envía el formulario vacío', async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><Registro /></MemoryRouter>);
@@ -51,7 +51,7 @@ describe('Registro Component', () => {
     expect(screen.getByText(/Debes aceptar los términos y condiciones./i)).toBeInTheDocument();
   });
 
-  // Test 3: (Pasaba)
+  // Test 3
   it('muestra error si las contraseñas no coinciden', async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><Registro /></MemoryRouter>);
@@ -61,7 +61,7 @@ describe('Registro Component', () => {
     expect(await screen.findByText(/Las contraseñas no coinciden./i)).toBeInTheDocument();
   });
 
-  // Test 4: (Pasaba)
+  // Test 4
   it('muestra error si la contraseña no cumple los requisitos', async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><Registro /></MemoryRouter>);
@@ -72,7 +72,7 @@ describe('Registro Component', () => {
     expect(await screen.findByText(expectedError)).toBeInTheDocument();
   });
 
-  // Test 5: (Pasaba)
+  // Test 5
   it('muestra error si no se aceptan los términos y condiciones', async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><Registro /></MemoryRouter>);
@@ -86,7 +86,7 @@ describe('Registro Component', () => {
     expect(await screen.findByText(/Debes aceptar los términos y condiciones./i)).toBeInTheDocument();
   });
 
-  // Test 6: (Pasaba)
+  // Test 6
   it('llama a alert y navigate si el registro es exitoso', async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><Registro /></MemoryRouter>);

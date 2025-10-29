@@ -15,7 +15,7 @@ beforeEach(() => {
 
 describe('Contacto Component', () => {
 
-  // Test 1: (Pasaba)
+  // Test 1
   it('muestra todos los campos del formulario de contacto', () => {
     render(<MemoryRouter><Contacto /></MemoryRouter>);
     expect(screen.getByLabelText(/nombre/i)).toBeInTheDocument();
@@ -24,7 +24,7 @@ describe('Contacto Component', () => {
     expect(screen.getByRole('button', { name: /enviar mensaje/i })).toBeInTheDocument();
   });
 
-  // Test 2: (Pasaba)
+  // Test 2
   it('muestra errores de validación si se envía el formulario vacío', async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><Contacto /></MemoryRouter>);
@@ -35,7 +35,7 @@ describe('Contacto Component', () => {
     expect(alertMock).not.toHaveBeenCalled();
   });
 
-  // Test 3: (Pasaba)
+  // Test 3
   it('muestra error si el formato de email no es válido', async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><Contacto /></MemoryRouter>);
@@ -46,7 +46,7 @@ describe('Contacto Component', () => {
     expect(await screen.findByText(/el formato del email no es válido./i)).toBeInTheDocument();
   });
 
-  // Test 4: (Pasaba)
+  // Test 4
   it('muestra error si el mensaje es muy corto', async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><Contacto /></MemoryRouter>);
@@ -57,7 +57,7 @@ describe('Contacto Component', () => {
     expect(await screen.findByText(/el mensaje debe tener al menos 10 caracteres./i)).toBeInTheDocument();
   });
 
-  // Test 5: (Pasaba)
+  // Test 5
   it('llama a alert y limpia los campos si el envío es exitoso', async () => {
     const user = userEvent.setup();
     render(<MemoryRouter><Contacto /></MemoryRouter>);
@@ -82,7 +82,7 @@ describe('Contacto Component', () => {
     expect(screen.queryByText(/el nombre es obligatorio/i)).not.toBeInTheDocument();
   });
 
-  // Test Mensaje muy largo (CORREGIDO)
+  // Test Mensaje muy largo 
   it('muestra error si el mensaje es muy largo', async () => {
     const user = userEvent.setup();
     render(
@@ -99,10 +99,8 @@ describe('Contacto Component', () => {
     
     await user.click(screen.getByRole('button', { name: /enviar mensaje/i }));
     
-    // 👇👇👇 CORRECCIÓN: Buscamos el texto exacto del log 👇👇👇
     expect(await screen.findByText(/El mensaje no puede exceder los 300 caracteres./i)).toBeInTheDocument();
-    
     expect(alertMock).not.toHaveBeenCalled();
     
-  }, 10000); // Mantenemos el timeout aumentado
+  }, 10000); 
 });

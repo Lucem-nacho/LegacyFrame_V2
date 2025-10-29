@@ -10,7 +10,7 @@ export default defineConfig({
     setupFiles: './src/setupTests.ts',
     
     // Dejamos esto listo para cuando ejecutes las pruebas
-    // y evitar el error del antivirus (el 'getComputedStyle')
+    // y evitar el error del antivirus 
     environmentOptions: {
       jsdom: {
         resources: 'usable'
