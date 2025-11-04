@@ -36,7 +36,15 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/contacto" element={<Contacto />} />
           <Route path="/registro" element={<Registro />} />
-          <Route path="/login" element={<Login />} />
+          <Route 
+  path="/login" 
+  element={
+    <Login onLoginSuccess={() => {
+      alert('¡Bienvenido! Has iniciado sesión.');
+      window.location.href = '/'; 
+    }} />
+  } 
+/>
           <Route path="/molduras" element={<Molduras />} />
           <Route path="/cuadros" element={<Cuadros />} />
           <Route path="/carrito" element={<Carrito />} />

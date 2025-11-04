@@ -153,6 +153,5 @@ const Contacto: React.FC = () => {
     </div>
   );
 };
-
 export default Contacto;
 
