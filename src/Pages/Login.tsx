@@ -6,10 +6,30 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const validateEmail = (val: string) => {
+    if (!val) return 'El correo es obligatorio.';
+    if (!/^\S+@\S+\.\S+$/.test(val)) return 'El formato del correo no es válido.';
+    return '';
+  };
+
+  const validatePassword = (val: string) => {
+    if (!val) return 'La contraseña es obligatoria.';
+    if (val.length < 6) return 'Mínimo 6 caracteres.';
+    return '';
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(''); // Limpia errores previos
+
+    const eErr = validateEmail(email);
+    const pErr = validatePassword(password);
+    setEmailError(eErr);
+    setPasswordError(pErr);
+    if (eErr || pErr) return;
 
     // --- SIMULACIÓN DE LOGIN ---
     // En una aplicación real, aquí validarías los datos con tu backend
@@ -50,9 +70,14 @@ const Login = () => {
                       className="form-control"
                       id="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (emailError) setEmailError(validateEmail(e.target.value));
+                      }}
+                      onBlur={() => setEmailError(validateEmail(email))}
                       required
                     />
+                    {emailError && <div className="form-text text-danger">{emailError}</div>}
                   </div>
 
                   {/* Contraseña */}
@@ -63,14 +88,19 @@ const Login = () => {
                       className="form-control"
                       id="password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (passwordError) setPasswordError(validatePassword(e.target.value));
+                      }}
+                      onBlur={() => setPasswordError(validatePassword(password))}
                       required
                     />
+                    {passwordError && <div className="form-text text-danger">{passwordError}</div>}
                   </div>
 
                   {/* Botón de envío */}
                   <div className="d-grid">
-                    <button type="submit" className="btn btn-primary fw-bold">
+                    <button type="submit" className="btn btn-primary fw-bold" disabled={!!validateEmail(email) || !!validatePassword(password)}>
                       Ingresar
                     </button>
                   </div>

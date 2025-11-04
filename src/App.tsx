@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Home from "./Pages/Home";
 import Contacto from "./Pages/Contacto";
 import Registro from "./Pages/Registro";
@@ -10,9 +10,21 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { useCart } from "./context/CartContext";
 import Terminos from "./Pages/Terminos";
+import PagoExitoso from "./Pages/PagoExitoso";
 
 function App() {
   const { items, total, clear, removeItem } = useCart();
+  const navigate = useNavigate();
+
+  const procederPago = () => {
+    const offEl = document.getElementById('carritoOffcanvas');
+    if (offEl && (window as any).bootstrap) {
+      const off = new (window as any).bootstrap.Offcanvas(offEl);
+      off.hide();
+    }
+    clear();
+    navigate('/pago-exitoso');
+  };
   return (
     <div className="app-container">
       {/* NAVBAR */}
@@ -29,6 +41,7 @@ function App() {
           <Route path="/cuadros" element={<Cuadros />} />
           <Route path="/carrito" element={<Carrito />} />
           <Route path="/terminos" element={<Terminos />} />
+          <Route path="/pago-exitoso" element={<PagoExitoso />} />
         </Routes>
       </div>
 
@@ -82,7 +95,7 @@ function App() {
               </div>
 
               <div className="d-grid gap-2">
-                <button className="btn btn-success">
+                <button className="btn btn-success" onClick={procederPago}>
                   <i className="fas fa-credit-card me-2"></i>Proceder al Pago
                 </button>
                 <button className="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
