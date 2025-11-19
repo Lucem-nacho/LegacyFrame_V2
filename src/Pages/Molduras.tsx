@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import ProductDetailModal from "../components/ProductDetailModal";
 // Sustituimos imágenes faltantes por equivalentes existentes
 import moldura3 from "../assets/moldura3.jpg";
@@ -31,6 +32,7 @@ const SINGLE_PRICE = 20000;
 
 const Molduras = () => {
   const { addItem } = useCart();
+  const { user } = useAuth(); // Obtener usuario autenticado para verificar si es admin
   const [category, setCategory] = useState<Category>("all");
   const [modalData, setModalData] = useState<null | {
     name: string;
@@ -40,21 +42,22 @@ const Molduras = () => {
     whatsappHref: string;
   }>(null);
   const [selectedProduct, setSelectedProduct] = useState<null | Product>(null);
+  const [editingProduct, setEditingProduct] = useState<null | Product>(null); // Producto siendo editado
 
-  const products: Product[] = useMemo(
-    () => [
-      {
-        id: "greca-zo",
-        name: "I 09 greca zo",
-        priceFrom: SINGLE_PRICE,
-        priceTo: SINGLE_PRICE,
-  image: moldura3,
-        description:
-          "Elegante greca decorativa con diseño tradicional ZO. Ideal para marcos clásicos.",
-        category: "grecas",
-        badge: "GRECAS",
-        badgeColor: "bg-primary",
-        whatsappText: "Consulta por moldura I 09 greca zo",
+  // Estado para lista de productos (convertido de const a useState para permitir edición/eliminación)
+  const [products, setProducts] = useState<Product[]>([
+    {
+      id: "greca-zo",
+      name: "I 09 greca zo",
+      priceFrom: SINGLE_PRICE,
+      priceTo: SINGLE_PRICE,
+image: moldura3,
+      description:
+        "Elegante greca decorativa con diseño tradicional ZO. Ideal para marcos clásicos.",
+      category: "grecas",
+      badge: "GRECAS",
+      badgeColor: "bg-primary",
+      whatsappText: "Consulta por moldura I 09 greca zo",
       },
       {
         id: "greca-corazon",
@@ -143,13 +146,9 @@ const Molduras = () => {
         category: "finger-joint",
         badge: "FINGER JOINT",
         badgeColor: "bg-warning",
-        whatsappText: "Consulta por moldura P-12 Finger Joint",
-      },
-    ],
-    []
-  );
-
-  const filtered = useMemo(
+      whatsappText: "Consulta por moldura P-12 Finger Joint",
+    },
+  ]);  const filtered = useMemo(
     () =>
       products.filter((p) => (category === "all" ? true : p.category === category)),
     [category, products]
@@ -197,6 +196,36 @@ const Molduras = () => {
     const modalEl = document.getElementById("productModal");
     const modal = (window as any).bootstrap && modalEl ? new (window as any).bootstrap.Modal(modalEl) : null;
     modal?.show();
+  };
+
+  // ==================== FUNCIONES DE ADMINISTRADOR ====================
+  
+  // Abre modal de edición para un producto (solo admin)
+  const openEditModal = (p: Product) => {
+    setEditingProduct({ ...p });
+    const modalEl = document.getElementById("editModal");
+    const modal = (window as any).bootstrap && modalEl ? new (window as any).bootstrap.Modal(modalEl) : null;
+    modal?.show();
+  };
+
+  // Guarda cambios del producto editado
+  const saveEdit = () => {
+    if (!editingProduct) return;
+    setProducts((prev) =>
+      prev.map((p) => (p.id === editingProduct.id ? editingProduct : p))
+    );
+    // Cerrar modal
+    const modalEl = document.getElementById("editModal");
+    const modalInstance = (window as any).bootstrap?.Modal?.getInstance(modalEl);
+    modalInstance?.hide();
+    setEditingProduct(null);
+  };
+
+  // Elimina un producto (con confirmación)
+  const deleteProduct = (id: string) => {
+    if (window.confirm("¿Estás seguro de eliminar este producto?")) {
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    }
   };
 
   return (
@@ -271,6 +300,18 @@ const Molduras = () => {
                   <button className="btn btn-primary btn-sm agregar-carrito" onClick={() => addToCart(p)}>
                     <i className="fas fa-cart-plus me-1"></i> Agregar
                   </button>
+                  
+                  {/* Botones de administrador (solo visibles si el usuario es admin) */}
+                  {user?.isAdmin && (
+                    <>
+                      <button className="btn btn-warning btn-sm" onClick={() => openEditModal(p)}>
+                        <i className="fas fa-edit"></i> Editar
+                      </button>
+                      <button className="btn btn-danger btn-sm" onClick={() => deleteProduct(p.id)}>
+                        <i className="fas fa-trash"></i> Eliminar
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -320,6 +361,81 @@ const Molduras = () => {
           if (selectedProduct) addToCart(selectedProduct);
         }}
       />
+
+      {/* Modal de edición de producto (solo para admin) */}
+      {user?.isAdmin && editingProduct && (
+        <div className="modal fade" id="editModal" tabIndex={-1}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Editar Moldura</h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label className="form-label">Nombre</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editingProduct.name}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, name: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Precio (CLP)</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={editingProduct.priceFrom}
+                    onChange={(e) =>
+                      setEditingProduct({
+                        ...editingProduct,
+                        priceFrom: Number(e.target.value),
+                        priceTo: Number(e.target.value),
+                      })
+                    }
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Descripción</label>
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    value={editingProduct.description}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, description: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">URL de Imagen</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editingProduct.image}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, image: e.target.value })
+                    }
+                  />
+                  <small className="form-text text-muted">
+                    Puedes pegar una URL o usar rutas locales como: moldura3, moldura4, etc.
+                  </small>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+                  Cancelar
+                </button>
+                <button type="button" className="btn btn-primary" onClick={saveEdit}>
+                  Guardar Cambios
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'; // Importa React y el hook useState. 'React' es necesario para JSX y <React.FormEvent>.
 import { Link, useNavigate } from 'react-router-dom'; // Importa Link para enlaces de navegación y useNavigate para redirección programática.
+import { useAuth } from '../context/AuthContext'; // Importa hook de autenticación para login con rol admin
 
 // --- Define la interfaz para las props que el componente Login puede recibir ---
 interface LoginProps {
@@ -16,6 +17,8 @@ type FormErrors = {
 // --- Define el componente funcional Login usando React.FC (Functional Component) y especificando sus props ---
 // Recibe 'onLoginSuccess' como prop (desestructurado).
 const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
+  // Obtiene la función de login del contexto de autenticación
+  const { login } = useAuth();
   // Inicializa el hook useNavigate para obtener la función de navegación.
   const navigate = useNavigate();
   // Define el estado para el campo 'email', inicializado como string vacío.
@@ -54,11 +57,17 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setEmailError(eErr);
     setPasswordError(pErr);
     if (eErr || pErr) return;
-    if (email === "a@a.cl" && password === "Pass123#") {
-
+    
+    // Intenta hacer login usando AuthContext (valida usuario normal y admin)
+    const success = login(email, password);
+    
+    if (success) {
+      // Login exitoso - limpia errores
+      setErrors({});
+      
       // Verifica si se proporcionó la prop 'onLoginSuccess' desde el componente padre (ej. App.tsx).
       if (onLoginSuccess) {
-        onLoginSuccess(); // Llama a la función pasada por el componente padre para notificar el éxito. El padre decide qué hacer (ej. guardar token, redirigir).
+        onLoginSuccess(); // Llama a la función pasada por el componente padre para notificar el éxito.
       } else {
         alert('¡Inicio de sesión exitoso!'); // Muestra una alerta simple de éxito.
         navigate('/'); // Redirige al usuario a la página de inicio ('/').

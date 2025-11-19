@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const { count } = useCart();
+  const { user, logout } = useAuth();
   return (
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid"> 
@@ -66,12 +68,31 @@ const Navbar = () => {
               )}
             </button>
             <span id="navbarAuthArea" className="d-flex align-items-center">
-              <Link className="btn btn-outline-dark me-2" to="/registro">
-                <i className="fas fa-user-plus me-1"></i>Registro
-              </Link>
-              <Link className="btn btn-dark" to="/login">
-                <i className="fas fa-sign-in-alt me-1"></i>Ingresar
-              </Link>
+              {user ? (
+                <>
+                  {/* Mostrar email y rol si el usuario está autenticado */}
+                  <span className="text-light me-3">
+                    {user.email}
+                    {user.isAdmin && (
+                      <span className="badge bg-warning text-dark ms-2">
+                        <i className="fas fa-crown"></i> ADMIN
+                      </span>
+                    )}
+                  </span>
+                  <button className="btn btn-outline-light btn-sm" onClick={logout}>
+                    <i className="fas fa-sign-out-alt me-1"></i>Salir
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link className="btn btn-outline-dark me-2" to="/registro">
+                    <i className="fas fa-user-plus me-1"></i>Registro
+                  </Link>
+                  <Link className="btn btn-dark" to="/login">
+                    <i className="fas fa-sign-in-alt me-1"></i>Ingresar
+                  </Link>
+                </>
+              )}
             </span>
           </div>
         </div>

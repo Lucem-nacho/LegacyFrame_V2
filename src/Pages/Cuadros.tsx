@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import ProductDetailModal from '../components/ProductDetailModal';
 import framePicture from '../assets/Frame Picture.png';
 import fameProxima from '../assets/fameproxima.png';
@@ -21,9 +22,12 @@ interface Product {
 
 const Cuadros = () => {
   const { addItem } = useCart();
+  const { user } = useAuth(); // Obtener usuario para verificar si es admin
   const [modalProducto, setModalProducto] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null); // Producto siendo editado
 
-  const products: Product[] = [
+  // Convertir a useState para permitir edición/eliminación
+  const [products, setProducts] = useState<Product[]>([
     {
       id: 'cuadro-1',
       name: 'Marco Clásico Dorado',
@@ -70,7 +74,7 @@ const Cuadros = () => {
       badgeColor: 'bg-secondary'
     },
     
-  ];
+  ]);
 
   
 
@@ -95,6 +99,36 @@ const Cuadros = () => {
     if (offEl) {
       const off = (window as any).bootstrap ? new (window as any).bootstrap.Offcanvas(offEl) : null;
       off?.show();
+    }
+  };
+
+  // ==================== FUNCIONES DE ADMINISTRADOR ====================
+  
+  // Abre modal de edición para un cuadro (solo admin)
+  const openEditModal = (p: Product) => {
+    setEditingProduct({ ...p });
+    const modalEl = document.getElementById("editCuadroModal");
+    const modal = (window as any).bootstrap && modalEl ? new (window as any).bootstrap.Modal(modalEl) : null;
+    modal?.show();
+  };
+
+  // Guarda cambios del cuadro editado
+  const saveEdit = () => {
+    if (!editingProduct) return;
+    setProducts((prev) =>
+      prev.map((p) => (p.id === editingProduct.id ? editingProduct : p))
+    );
+    // Cerrar modal
+    const modalEl = document.getElementById("editCuadroModal");
+    const modalInstance = (window as any).bootstrap?.Modal?.getInstance(modalEl);
+    modalInstance?.hide();
+    setEditingProduct(null);
+  };
+
+  // Elimina un cuadro (con confirmación)
+  const deleteProduct = (id: string) => {
+    if (window.confirm("¿Estás seguro de eliminar este cuadro?")) {
+      setProducts((prev) => prev.filter((p) => p.id !== id));
     }
   };
 
@@ -170,6 +204,18 @@ const Cuadros = () => {
                       >
                         <i className="fas fa-cart-plus me-1"></i> Agregar
                       </button>
+                      
+                      {/* Botones de administrador (solo visibles si el usuario es admin) */}
+                      {user?.isAdmin && (
+                        <>
+                          <button className="btn btn-warning btn-sm" onClick={() => openEditModal(product)}>
+                            <i className="fas fa-edit"></i> Editar
+                          </button>
+                          <button className="btn btn-danger btn-sm" onClick={() => deleteProduct(product.id)}>
+                            <i className="fas fa-trash"></i> Eliminar
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -233,6 +279,80 @@ const Cuadros = () => {
           }
         }}
       />
+
+      {/* Modal de edición de cuadro (solo para admin) */}
+      {user?.isAdmin && editingProduct && (
+        <div className="modal fade" id="editCuadroModal" tabIndex={-1}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Editar Cuadro</h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label className="form-label">Nombre</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editingProduct.name}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, name: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Precio (CLP)</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={editingProduct.price}
+                    onChange={(e) =>
+                      setEditingProduct({
+                        ...editingProduct,
+                        price: Number(e.target.value),
+                      })
+                    }
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Descripción</label>
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    value={editingProduct.description}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, description: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">URL de Imagen</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={editingProduct.image}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, image: e.target.value })
+                    }
+                  />
+                  <small className="form-text text-muted">
+                    Puedes pegar una URL o usar rutas locales de assets.
+                  </small>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+                  Cancelar
+                </button>
+                <button type="button" className="btn btn-primary" onClick={saveEdit}>
+                  Guardar Cambios
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
