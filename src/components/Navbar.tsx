@@ -1,16 +1,17 @@
 import { Link } from 'react-router-dom';
-import logo from '../assets/logo.png';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const { count } = useCart();
   const { user, logout } = useAuth();
+
   return (
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid"> 
         <Link className="navbar-brand" to="/">
-          <img className="logo-brand" src={logo} alt="Legacy Frames" />
+          {/* CORRECCIÓN: Usamos la ruta de texto directa a la carpeta public */}
+          <img className="logo-brand" src="/assets/logo.png" alt="Legacy Frames" />
         </Link>
         <button 
           className="navbar-toggler" 
@@ -32,27 +33,14 @@ const Navbar = () => {
               <Link className="nav-link" to="/cuadros">Cuadros</Link>
             </li>
             <li className="nav-item dropdown">
-              <a 
-                className="nav-link dropdown-toggle" 
-                href="#" 
-                role="button" 
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Más
-              </a>
-              <ul className="dropdown-menu">
-                <li><Link className="dropdown-item" to="/contacto">Contacta</Link></li>
-                <li><Link className="dropdown-item" to="/">Empresa</Link></li>
-                <li><hr className="dropdown-divider" /></li>
-                <li><Link className="dropdown-item" to="/registro">Registro</Link></li>
-              </ul>
+              {/* Puedes agregar más items aquí si es necesario */}
             </li>
           </ul>
+          
           <div className="d-flex align-items-center">
-            {/* Carrito */}
+            {/* Botón del Carrito */}
             <button 
-              className="btn btn-outline-dark me-2 position-relative btn-carrito" 
+              className="btn btn-outline-light position-relative me-3" 
               type="button" 
               data-bs-toggle="offcanvas" 
               data-bs-target="#carritoOffcanvas" 
@@ -67,6 +55,7 @@ const Navbar = () => {
                 </span>
               )}
             </button>
+            
             <span id="navbarAuthArea" className="d-flex align-items-center">
               {user ? (
                 <>
@@ -79,6 +68,15 @@ const Navbar = () => {
                       </span>
                     )}
                   </span>
+
+                  {/* --- BOTÓN SOLO PARA ADMIN --- */}
+                  {user.isAdmin && (
+                    <Link className="btn btn-warning btn-sm me-2 fw-bold" to="/admin">
+                      <i className="fas fa-cogs me-1"></i> Panel
+                    </Link>
+                  )}
+                  {/* ----------------------------- */}
+
                   <button className="btn btn-outline-light btn-sm" onClick={logout}>
                     <i className="fas fa-sign-out-alt me-1"></i>Salir
                   </button>

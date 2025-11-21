@@ -55,6 +55,12 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
       // 2. Si funciona, obtenemos el token
       const token = response.data.token;
+
+      // USAR LA NUEVA FUNCIÓN DEL CONTEXTO
+      login(token); // <--- Pasamos el token, el contexto se encarga de decodificar y guardar
+
+      // Redirección
+      navigate('/');
       
       // 3. Guardamos el token en el navegador
       localStorage.setItem('token', token);

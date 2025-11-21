@@ -1,5 +1,12 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactNode } from 'react'; // <--- SOLUCIÓN: Importación explícita de tipo
+import { jwtDecode } from "jwt-decode";
+
+interface DecodedToken {
+  sub: string;
+  rol: string;
+  exp: number;
+}
 
 interface User {
   email: string;
@@ -8,7 +15,7 @@ interface User {
 
 interface AuthContextValue {
   user: User | null;
-  login: (email: string, password: string) => boolean;
+  login: (token: string) => void;
   logout: () => void;
 }
 
@@ -20,47 +27,47 @@ export const useAuth = () => {
   return ctx;
 };
 
-const STORAGE_KEY = 'legacyframe_auth_v1';
-const ADMIN_EMAIL = 'admin@legacyframes.cl';
-const ADMIN_PASSWORD = 'Admin123#';
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    try {
-      if (user) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-      } else {
-        localStorage.removeItem(STORAGE_KEY);
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode<DecodedToken>(token);
+        if (decoded.exp * 1000 < Date.now()) {
+          logout();
+        } else {
+          setUser({
+            email: decoded.sub,
+            isAdmin: decoded.rol === 'ADMIN'
+          });
+        }
+      } catch (error) {
+        logout();
       }
-    } catch {
-      // Ignorar errores de almacenamiento
     }
-  }, [user]);
+  }, []);
 
-  const login = (email: string, password: string): boolean => {
-    // Verificar si es admin
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      setUser({ email, isAdmin: true });
-      return true;
-    }
-    // Usuario normal (a@a.cl / Pass123#)
-    if (email === 'a@a.cl' && password === 'Pass123#') {
-      setUser({ email, isAdmin: false });
-      return true;
-    }
-    return false;
+  const login = (token: string) => {
+    localStorage.setItem('token', token);
+    const decoded = jwtDecode<DecodedToken>(token);
+    
+    setUser({
+      email: decoded.sub,
+      isAdmin: decoded.rol === 'ADMIN'
+    });
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    window.location.href = '/';
+  };
 
-  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

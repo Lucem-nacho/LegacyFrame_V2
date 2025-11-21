@@ -1,4 +1,5 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
+import axios from 'axios';
 import Home from "./Pages/Home";
 import Contacto from "./Pages/Contacto";
 import Registro from "./Pages/Registro";
@@ -11,19 +12,59 @@ import Footer from "./components/Footer";
 import { useCart } from "./context/CartContext";
 import Terminos from "./Pages/Terminos";
 import PagoExitoso from "./Pages/PagoExitoso";
+import AdminRoute from "./components/AdminRoute";
+import AdminPanel from "./Pages/AdminPanel";
+import { useAuth } from "./context/AuthContext";
 
 function App() {
   const { items, total, clear, removeItem } = useCart();
+  const { user } = useAuth(); // <--- 3. OBTENER USUARIO
   const navigate = useNavigate();
 
-  const procederPago = () => {
-    const offEl = document.getElementById('carritoOffcanvas');
-    if (offEl && (window as any).bootstrap) {
-      const off = new (window as any).bootstrap.Offcanvas(offEl);
-      off.hide();
+  const procederPago = async () => {
+    // A. Validar que el usuario esté logueado
+    if (!user) {
+      alert("Debes iniciar sesión para realizar una compra.");
+      navigate("/login");
+      return;
     }
-    clear();
-    navigate('/pago-exitoso');
+
+    try {
+      // B. Preparar los datos para ms_pedidos
+      // Mapeamos los items del carrito al formato que pide el DTO de Java
+      const itemsParaBackend = items.map(item => ({
+        productoId: item.id,
+        nombreProducto: item.name || "Producto sin nombre", // Aseguramos que tenga nombre
+        cantidad: item.quantity,
+        precioUnitario: item.price
+      }));
+
+      const pedidoDto = {
+        items: itemsParaBackend
+      };
+
+      // C. Enviar al Microservicio (Puerto 8084)
+      // Recuerda que tu endpoint pide el email como parámetro: ?email=...
+      await axios.post(`http://localhost:8084/api/orders?email=${user.email}`, pedidoDto);
+
+      // D. Si todo sale bien:
+      // 1. Cerramos el offcanvas (menú lateral)
+      const offEl = document.getElementById('carritoOffcanvas');
+      if (offEl && (window as any).bootstrap) {
+        const off = new (window as any).bootstrap.Offcanvas(offEl);
+        off.hide();
+      }
+      
+      // 2. Vaciamos carrito local
+      clear();
+      
+      // 3. Redirigimos a éxito
+      navigate('/pago-exitoso');
+
+    } catch (error) {
+      console.error("Error al procesar el pedido:", error);
+      alert("Hubo un error al procesar tu compra. Inténtalo nuevamente.");
+    }
   };
   return (
     <div className="app-container">
@@ -36,20 +77,13 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/contacto" element={<Contacto />} />
           <Route path="/registro" element={<Registro />} />
-          <Route 
-  path="/login" 
-  element={
-    <Login onLoginSuccess={() => {
-      alert('¡Bienvenido! Has iniciado sesión.');
-      window.location.href = '/'; 
-    }} />
-  } 
-/>
+          <Route path="/login" element={<Login onLoginSuccess={() => {alert('¡Bienvenido! Has iniciado sesión.');window.location.href = '/'; }} />}/>
           <Route path="/molduras" element={<Molduras />} />
           <Route path="/cuadros" element={<Cuadros />} />
           <Route path="/carrito" element={<Carrito />} />
           <Route path="/terminos" element={<Terminos />} />
           <Route path="/pago-exitoso" element={<PagoExitoso />} />
+          <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>}/>
         </Routes>
       </div>
 
