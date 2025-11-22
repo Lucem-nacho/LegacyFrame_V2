@@ -1,0 +1,483 @@
+/* LEGACY FRAMES - ESTILO PROFESIONAL (CORREGIDO) */
+
+:root {
+    --primary-color: #8B5C2A;
+    --secondary-color: #A6784E;
+    --accent-color: #D4A574;
+    --dark-color: #5C3A1A;
+    --light-bg: #FAF8F5;
+    --text-dark: #2c3e50;
+    --text-light: #6c757d;
+    --shadow: 0 4px 15px rgba(0,0,0,0.1);
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: #fafafa;
+}
+
+
+.navbar {
+    background-color: var(--primary-color) !important; 
+    border-bottom: 3px solid var(--dark-color);      
+    box-shadow: var(--shadow);
+    padding: 15px 20px;
+}
+
+.navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #ffffff !important;
+    text-decoration: none;
+}
+
+.navbar .navbar-brand img {
+    margin-right: 12px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.logo-brand {
+    width: 100px;
+    height: auto;
+}
+
+.navbar .nav-link {
+    color: #ffffff !important;
+    font-weight: 500;
+    padding: 8px 16px !important;
+    margin: 0 5px;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.navbar .nav-link:hover, .navbar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+.navbar .dropdown-menu {
+    background-color: var(--secondary-color);
+    border: none;
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.navbar .dropdown-item {
+    color: #ffffff !important;
+    padding: 10px 20px;
+    transition: var(--transition);
+}
+
+.navbar .dropdown-item:hover, .navbar .dropdown-item.active {
+    background-color: var(--accent-color);
+    color: #ffffff !important;
+}
+
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+}
+
+.form-max-500 {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.banner-img {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: cover;
+}
+
+.empresa-container {
+    background-color: #fff;
+    padding: 40px 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin: -80px auto 50px auto;
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+}
+
+.empresa-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.empresa-header h1 {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.caracteristica {
+    padding: 20px;
+}
+
+.product-thumb {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    box-shadow: var(--shadow);
+}
+
+.section-title {
+    font-weight: 700;
+    color: var(--dark-color);
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: var(--accent-color);
+}
+
+.numeros-empresa .numero-destacado {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.cta-section {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+}
+
+.modal-img {
+    max-height: 400px;
+    width: auto;
+    border-radius: var(--border-radius);
+}
+
+/* === Ajustes de imágenes (tamaños más pequeños y consistentes) === */
+/* Carrusel de Cuadros */
+.carousel-img {
+    max-height: 360px;
+    width: 100%;
+    object-fit: cover;
+}
+
+/* Imagen de tarjeta en Cuadros */
+.card-img-cover {
+    height: 220px;
+    width: 100%;
+    object-fit: cover;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+}
+
+/* Tarjetas de Molduras */
+.product-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.product-image-container {
+    position: relative;
+    height: 200px; /* tamaño pequeño y uniforme */
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* recorta manteniendo proporción */
+    display: block;
+}
+
+.product-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.35);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.product-image-container:hover .product-overlay {
+    opacity: 1;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--dark-color); /* Usamos el color café más oscuro */
+    color: #adb5bd; /* Texto principal más sutil */
+    padding: 50px 0 20px 0;
+}
+
+.footer-title {
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 1rem;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.footer-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background-color: var(--accent-color);
+}
+
+.footer-text, .footer-location span {
+    color: #adb5bd;
+}
+
+.footer-location {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.footer-location i {
+    margin-right: 10px;
+    color: var(--accent-color);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links a {
+    color: #adb5bd;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 12px;
+    transition: var(--transition);
+}
+
+.footer-links a:hover {
+    color: #ffffff; /* Blanco al pasar el mouse */
+    transform: translateX(5px);
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.contact-item i {
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    color: var(--accent-color);
+}
+
+.footer-social .social-link {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: #adb5bd;
+    text-decoration: none;
+    transition: var(--transition);
+    padding: 8px 0;
+    border-radius: 4px;
+}
+
+.footer-social .social-link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.footer-social .social-link i {
+    margin-right: 10px;
+    width: 20px;
+}
+
+.footer-divider {
+    border: none;
+    height: 1px;
+    /* Efecto de degradado como en tu página original */
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+    margin: 30px 0 20px 0;
+}
+
+.footer-copyright {
+    color: #8f9a9d;
+    font-size: 0.9rem;
+    margin: 0;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .empresa-container {
+        margin: 30px auto;
+        padding: 30px 20px;
+    }
+    
+    .empresa-header h1 {
+        font-size: 2.2rem;
+    }
+    
+    .numero-destacado {
+        font-size: 2.5rem;
+    }
+}
+
+
+
+/* PÁGINA DE REGISTRO  */
+.register-page-container {
+  background-image: url('https://images.unsplash.com/photo-1517842645767-c6f90405774b?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  min-height: calc(100vh - 120px); /* Ajusta la altura para que no quede cubierto por el footer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.register-card-header {
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.register-card-header h2 {
+  color: var(--primary-color);
+}
+
+.register-card-body {
+  padding: 2rem;
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  display: block; /* Bootstrap a veces lo oculta, nos aseguramos que se vea */
+  color: #dc3545;
+  font-size: 0.875em;
+}
+
+.register-card .btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.register-card .btn-primary:hover {
+  background-color: var(--dark-color);
+  border-color: var(--dark-color);
+}
+
+
+/* INDICADOR DE CONTRASEÑA */
+
+.password-strength-indicator ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.password-strength-indicator li {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  transition: color 0.3s ease-in-out;
+}
+
+.password-strength-indicator li .fas {
+  width: 18px; /* Alinea los iconos */
+}
+
+
+/*  PÁGINA DE LOGIN  */
+
+.login-page-container {
+  background-image: url('https://images.unsplash.com/photo-1593344484962-796b931a8a33?q=80&w=1932&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.login-card-header {
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.login-card-header h2 {
+  color: var(--primary-color);
+}
+
+.login-card-body {
+  padding: 2rem;
+}
+
+.login-card .btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.login-card .btn-primary:hover {
+  background-color: var(--dark-color);
+  border-color: var(--dark-color);
+}
