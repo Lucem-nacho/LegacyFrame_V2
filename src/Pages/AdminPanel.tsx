@@ -36,20 +36,28 @@ interface Categoria {
   nombre: string;
 }
 
+interface Usuario {
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string;
+  direccion: string;
+}
+
 const CLP = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
 
 const AdminPanel = () => {
-  // Datos del Dashboard
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]); 
   const [categorias, setCategorias] = useState<Categoria[]>([]); 
   
   const [loading, setLoading] = useState(true);
 
-  // Estados para el Formulario (Crear/Editar)
+  // Estados para el Formulario
   const [showModal, setShowModal] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null); // NULL = Creando, NÚMERO = Editando
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -60,43 +68,59 @@ const AdminPanel = () => {
     categoriaId: "" 
   });
 
-  // Cargar datos iniciales
   useEffect(() => {
     cargarDatos();
   }, []);
 
+  // --- AQUÍ ESTÁ EL ARREGLO ---
   const cargarDatos = async () => {
     try {
       setLoading(true);
+      
+      // 1. CARGA SEGURA (Datos que NO requieren rol de Admin estricto o son públicos)
+      // Si esto falla, es porque se cayeron los servidores.
       const [resPed, resProd, resMsg, resCat] = await Promise.all([
         axios.get("http://localhost:8084/api/orders/admin/all"),
         axios.get("http://localhost:8083/api/catalog/productos"),
         axios.get("http://localhost:8081/api/contactos"), 
-        axios.get("http://localhost:8083/api/catalog/categorias") 
+        axios.get("http://localhost:8083/api/catalog/categorias")
       ]);
 
       setPedidos(resPed.data);
       setProductos(resProd.data);
       setMensajes(resMsg.data);
       setCategorias(resCat.data);
+
+      // 2. CARGA DELICADA (Usuarios - Requiere ser ADMIN real)
+      // Lo ponemos en un try-catch separado para que si falla, NO rompa lo demás.
+      try {
+          const token = localStorage.getItem("token");
+          if (token) {
+              const resUsers = await axios.get("http://localhost:8082/auth/list", {
+                  headers: { Authorization: `Bearer ${token}` }
+              });
+              setUsuarios(resUsers.data);
+          }
+      } catch (authError) {
+          console.warn("No se pudo cargar la lista de usuarios. Tal vez no eres ADMIN o el token expiró.");
+          // No hacemos nada, simplemente la lista de usuarios quedará vacía.
+      }
       
       setLoading(false);
     } catch (error) {
-      console.error("Error cargando admin:", error);
+      console.error("Error cargando datos principales:", error);
       setLoading(false);
     }
   };
 
-  // --- ABRIR MODAL PARA CREAR ---
   const abrirModalCrear = () => {
-    setEditingId(null); // Modo Crear
+    setEditingId(null);
     setFormData({ nombre: "", descripcion: "", precio: "", stock: "", imagenUrl: "", categoriaId: "" });
     setShowModal(true);
   };
 
-  // --- ABRIR MODAL PARA EDITAR ---
   const abrirModalEditar = (producto: Producto) => {
-    setEditingId(producto.id); // Modo Editar (Guardamos el ID)
+    setEditingId(producto.id);
     setFormData({
       nombre: producto.nombre,
       descripcion: producto.descripcion || "",
@@ -108,7 +132,6 @@ const AdminPanel = () => {
     setShowModal(true);
   };
 
-  // --- GUARDAR (CREAR O EDITAR) ---
   const handleGuardar = async () => {
     if (!formData.nombre || !formData.precio || !formData.categoriaId) {
       alert("Por favor completa nombre, precio y categoría.");
@@ -120,27 +143,20 @@ const AdminPanel = () => {
       descripcion: formData.descripcion,
       precio: parseFloat(formData.precio),
       stock: parseInt(formData.stock) || 0,
-      // Si no hay imagen, ponemos el placeholder gris
       imagenUrl: formData.imagenUrl || "https://via.placeholder.com/300x300/cccccc/000000?text=Sin+Imagen",
-      categoria: {
-          id: parseInt(formData.categoriaId)
-      }
+      categoria: { id: parseInt(formData.categoriaId) }
     };
 
     try {
       if (editingId) {
-        // --- MODO EDITAR (PUT) ---
         await axios.put(`http://localhost:8083/api/catalog/productos/${editingId}`, payload);
         alert("¡Producto actualizado correctamente!");
       } else {
-        // --- MODO CREAR (POST) ---
         await axios.post("http://localhost:8083/api/catalog/productos", payload);
         alert("¡Producto creado con éxito!");
       }
-
       setShowModal(false);
-      cargarDatos(); // Recargar la lista
-      
+      cargarDatos();
     } catch (error) {
       console.error("Error guardando producto:", error);
       alert("Hubo un error al guardar.");
@@ -183,10 +199,10 @@ const AdminPanel = () => {
           </div>
         </div>
         <div className="col-md-3">
-          <div className="card text-white bg-primary mb-3 shadow h-100">
+          <div className="card text-white bg-info mb-3 shadow h-100" style={{backgroundColor: '#17a2b8'}}>
             <div className="card-body">
-              <h5 className="card-title">Mensajes</h5>
-              <p className="card-text fs-4 fw-bold">{mensajes.length}</p>
+              <h5 className="card-title">Clientes</h5>
+              <p className="card-text fs-4 fw-bold"><i className="fas fa-users me-2"></i>{usuarios.length}</p>
             </div>
           </div>
         </div>
@@ -201,14 +217,13 @@ const AdminPanel = () => {
       </div>
 
       <div className="row">
-        {/* TABLA DE PRODUCTOS (CORREGIDA PARA EVITAR TEMBLOR) */}
+        {/* TABLA DE PRODUCTOS */}
         <div className="col-lg-8 mb-4">
           <div className="card shadow-sm h-100">
             <div className="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
               <span><i className="fas fa-box-open me-2"></i> Inventario de Productos</span>
               <span className="badge bg-primary">{productos.length} Total</span>
             </div>
-            {/* FIX 1: overflowY: "auto" para estabilizar el scroll */}
             <div className="table-responsive" style={{maxHeight: "400px", overflowY: "auto"}}>
               <table className="table table-hover mb-0 align-middle">
                 <thead className="table-light sticky-top" style={{ zIndex: 1 }}>
@@ -226,7 +241,6 @@ const AdminPanel = () => {
                     <tr key={prod.id}>
                       <td>#{prod.id}</td>
                       <td>
-                        {/* FIX 2: Clase d-block para que la imagen no cree espacio extra */}
                         <img 
                           src={prod.imagenUrl} 
                           alt={prod.nombre} 
@@ -259,7 +273,7 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        {/* ALERTA DE STOCK (Lateral) */}
+        {/* ALERTA DE STOCK */}
         <div className="col-lg-4 mb-4">
           <div className="card shadow-sm h-100">
             <div className="card-header bg-white fw-bold text-danger">
@@ -278,10 +292,12 @@ const AdminPanel = () => {
         </div>
       </div>
 
-      {/* SECCIÓN MENSAJES */}
+      {/* SECCIÓN MENSAJES Y USUARIOS */}
       <div className="row mt-4">
-        <div className="col-12">
-          <div className="card shadow-sm">
+        
+        {/* MENSAJES */}
+        <div className="col-lg-6 mb-4">
+          <div className="card shadow-sm h-100">
             <div className="card-header bg-white fw-bold text-primary">
               <i className="fas fa-envelope me-2"></i> Mensajes Recientes
             </div>
@@ -292,7 +308,6 @@ const AdminPanel = () => {
                     <tr>
                       <th>Fecha</th>
                       <th>Nombre</th>
-                      <th>Email</th>
                       <th>Mensaje</th>
                     </tr>
                   </thead>
@@ -301,8 +316,7 @@ const AdminPanel = () => {
                       <tr key={msg.id}>
                         <td>{new Date(msg.fechaEnvio).toLocaleDateString()}</td>
                         <td className="fw-bold">{msg.nombre}</td>
-                        <td>{msg.email}</td>
-                        <td>{msg.mensaje}</td>
+                        <td className="text-truncate" style={{maxWidth: '150px'}}>{msg.mensaje}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -311,9 +325,47 @@ const AdminPanel = () => {
             </div>
           </div>
         </div>
+
+        {/* LISTA DE USUARIOS */}
+        <div className="col-lg-6 mb-4">
+          <div className="card shadow-sm h-100">
+            <div className="card-header bg-white fw-bold text-info">
+              <i className="fas fa-users me-2"></i> Usuarios Registrados
+            </div>
+            <div className="card-body p-0">
+              <div className="table-responsive" style={{maxHeight: '300px', overflowY: 'auto'}}>
+                <table className="table table-hover mb-0">
+                  <thead className="table-info sticky-top">
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Email</th>
+                      <th>Teléfono</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usuarios.map((usr, idx) => (
+                      <tr key={idx}>
+                        <td>{usr.nombre} {usr.apellido}</td>
+                        <td>{usr.email}</td>
+                        <td>{usr.telefono || "-"}</td>
+                      </tr>
+                    ))}
+                    {usuarios.length === 0 && (
+                      <tr><td colSpan={3} className="text-center p-3 text-muted">
+                        No se pudo cargar la lista o no hay usuarios. <br/>
+                        <small>(Revisa que estés logueado como ADMIN: admin@legacyframes.cl)</small>
+                      </td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      {/* --- MODAL DINÁMICO (CREAR / EDITAR) --- */}
+      {/* MODAL */}
       {showModal && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
@@ -334,7 +386,6 @@ const AdminPanel = () => {
                       onChange={(e) => setFormData({...formData, nombre: e.target.value})}
                     />
                   </div>
-                  
                   <div className="row">
                     <div className="col-6 mb-3">
                       <label className="form-label">Precio</label>
@@ -353,7 +404,6 @@ const AdminPanel = () => {
                       />
                     </div>
                   </div>
-
                   <div className="mb-3">
                     <label className="form-label">Categoría</label>
                     <select 
@@ -367,7 +417,6 @@ const AdminPanel = () => {
                       ))}
                     </select>
                   </div>
-
                   <div className="mb-3">
                     <label className="form-label">URL Imagen</label>
                     <input 
@@ -376,7 +425,6 @@ const AdminPanel = () => {
                       onChange={(e) => setFormData({...formData, imagenUrl: e.target.value})}
                     />
                   </div>
-
                   <div className="mb-3">
                     <label className="form-label">Descripción</label>
                     <textarea 
@@ -397,7 +445,6 @@ const AdminPanel = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
