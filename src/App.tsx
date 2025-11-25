@@ -6,7 +6,6 @@ import Registro from "./Pages/Registro";
 import Login from "./Pages/Login";
 import Molduras from "./Pages/Molduras";
 import Cuadros from "./Pages/Cuadros";
-import Carrito from "./Pages/Carrito";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { useCart } from "./context/CartContext";
@@ -17,12 +16,11 @@ import AdminPanel from "./Pages/AdminPanel";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
-  const { items, total, clear, removeItem } = useCart();
-  const { user } = useAuth(); // <--- 3. OBTENER USUARIO
+  const { items, total, clear, removeItem, increaseItem, decreaseItem } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const procederPago = async () => {
-    // A. Validar que el usuario esté logueado
     if (!user) {
       alert("Debes iniciar sesión para realizar una compra.");
       navigate("/login");
@@ -30,119 +28,150 @@ function App() {
     }
 
     try {
-      // B. Preparar los datos para ms_pedidos
-      // Mapeamos los items del carrito al formato que pide el DTO de Java
       const itemsParaBackend = items.map(item => ({
-        productoId: item.id,
-        nombreProducto: item.name || "Producto sin nombre", // Aseguramos que tenga nombre
+        productoId: Number(item.id),
+        nombreProducto: item.name,
         cantidad: item.quantity,
-        precioUnitario: item.price
+        precioUnitario: item.price || 0
       }));
 
-      const pedidoDto = {
-        items: itemsParaBackend
-      };
+      const payload = { items: itemsParaBackend };
 
-      // C. Enviar al Microservicio (Puerto 8084)
-      // Recuerda que tu endpoint pide el email como parámetro: ?email=...
-      await axios.post(`http://localhost:8084/api/orders?email=${user.email}`, pedidoDto);
-
-      // D. Si todo sale bien:
-      // 1. Cerramos el offcanvas (menú lateral)
-      const offEl = document.getElementById('carritoOffcanvas');
-      if (offEl && (window as any).bootstrap) {
-        const off = new (window as any).bootstrap.Offcanvas(offEl);
-        off.hide();
-      }
+      await axios.post(`http://localhost:8084/api/orders?email=${user.email}`, payload);
       
-      // 2. Vaciamos carrito local
       clear();
+      navigate("/pago-exitoso");
       
-      // 3. Redirigimos a éxito
-      navigate('/pago-exitoso');
-
     } catch (error) {
       console.error("Error al procesar el pedido:", error);
-      alert("Hubo un error al procesar tu compra. Inténtalo nuevamente.");
+      alert("Hubo un error al procesar tu compra. Revisa el stock o inténtalo nuevamente.");
     }
   };
-  return (
-    <div className="app-container">
-      {/* NAVBAR */}
-      <Navbar />
 
-      {/* CONTENIDO PRINCIPAL */}
-      <div className="main-content">
+  return (
+    <div className="d-flex flex-column min-vh-100">
+      <Navbar />
+      
+      <div className="flex-grow-1">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/contacto" element={<Contacto />} />
-          <Route path="/registro" element={<Registro />} />
-          <Route path="/login" element={<Login onLoginSuccess={() => {alert('¡Bienvenido! Has iniciado sesión.');window.location.href = '/'; }} />}/>
           <Route path="/molduras" element={<Molduras />} />
           <Route path="/cuadros" element={<Cuadros />} />
-          <Route path="/carrito" element={<Carrito />} />
           <Route path="/terminos" element={<Terminos />} />
+          <Route path="/registro" element={<Registro />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/pago-exitoso" element={<PagoExitoso />} />
-          <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>}/>
+          
+          <Route path="/admin" element={
+            <AdminRoute>
+              <AdminPanel />
+            </AdminRoute>
+          } />
         </Routes>
       </div>
 
-      {/* FOOTER */}
       <Footer />
 
-      {/* Carrito Offcanvas */}
+      {/* --- CARRITO OFFCANVAS --- */}
       <div className="offcanvas offcanvas-end" tabIndex={-1} id="carritoOffcanvas" aria-labelledby="carritoOffcanvasLabel">
-        <div className="offcanvas-header">
+        <div className="offcanvas-header bg-primary text-white">
           <h5 className="offcanvas-title" id="carritoOffcanvasLabel">
-            <i className="fas fa-shopping-cart me-2"></i>Mi Carrito
+            <i className="fas fa-shopping-cart me-2"></i>Tu Carrito
           </h5>
-          <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          <button type="button" className="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div className="offcanvas-body">
+        <div className="offcanvas-body d-flex flex-column">
+          
           {items.length === 0 ? (
-            <div className="text-center py-5">
-              <i className="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-              <h6 className="text-muted">Tu carrito está vacío</h6>
-              <p className="text-muted small">Agrega productos para comenzar tu compra</p>
+            <div className="text-center my-auto">
+              <i className="fas fa-shopping-basket fa-4x text-muted mb-3"></i>
+              <p className="lead">Tu carrito está vacío.</p>
+              <button className="btn btn-outline-primary rounded-pill" data-bs-dismiss="offcanvas">
+                Ir a comprar
+              </button>
             </div>
           ) : (
             <>
-              <div className="list-group mb-3">
+              <div className="flex-grow-1 overflow-auto px-2 pt-2">
                 {items.map((it) => (
-                  <div key={it.id} className="list-group-item d-flex align-items-center">
-                    {it.image && (
-                      <img src={it.image} alt={it.name} style={{ width: 48, height: 48, objectFit: 'cover' }} className="me-3 rounded" />
-                    )}
-                    <div className="flex-grow-1">
-                      <div className="fw-semibold">{it.name}</div>
-                      <div className="small text-muted">
-                        {it.priceText ? it.priceText : (it.price ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(it.price) : '')}
-                        {` · x${it.quantity}`}
+                  <div key={it.id} className="card mb-3 border-0 shadow-sm">
+                    <div className="row g-0 align-items-center">
+                      <div className="col-3 p-2">
+                        {/* Imagen del producto */}
+                        <img 
+                          src={it.image} 
+                          alt={it.name} 
+                          className="img-fluid rounded" 
+                          style={{ width: '100%', height: '70px', objectFit: 'cover' }}
+                          onError={(e) => e.currentTarget.src = "https://via.placeholder.com/70"}
+                        />
+                      </div>
+                      <div className="col-9">
+                        <div className="card-body p-2">
+                          <div className="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 className="card-title mb-1 fw-bold text-dark text-truncate" style={{ maxWidth: '140px' }}>{it.name}</h6>
+                                <p className="text-primary fw-bold small mb-0">
+                                    {it.price ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(it.price) : ''}
+                                </p>
+                            </div>
+                            <button className="btn btn-sm text-muted p-1 hover-danger" onClick={() => removeItem(it.id)} title="Eliminar">
+                              <i className="fas fa-trash-alt fa-sm"></i>
+                            </button>
+                          </div>
+                          
+                          {/* --- NUEVOS CONTROLES DE CANTIDAD ELEGANTES --- */}
+                          <div className="d-flex align-items-center border rounded-pill px-2 py-1 shadow-sm bg-white mt-2" style={{ width: 'fit-content' }}>
+                            {/* Botón Menos */}
+                            <button 
+                              className={`btn btn-sm border-0 p-0 d-flex align-items-center justify-content-center ${it.quantity <= 1 ? 'text-muted' : 'text-dark'}`}
+                              style={{ width: '24px', height: '24px' }}
+                              onClick={() => decreaseItem(it.id)}
+                              disabled={it.quantity <= 1}
+                            >
+                              <i className="fas fa-minus fa-xs"></i>
+                            </button>
+                            
+                            {/* Cantidad */}
+                            <span className="mx-3 fw-bold text-dark small user-select-none" style={{minWidth: '20px', textAlign: 'center'}}>
+                                {it.quantity}
+                            </span>
+                            
+                            {/* Botón Más (Color Primario) */}
+                            <button 
+                              className="btn btn-sm border-0 p-0 text-primary d-flex align-items-center justify-content-center"
+                              style={{ width: '24px', height: '24px' }}
+                              onClick={() => increaseItem(it.id)}
+                            >
+                              <i className="fas fa-plus fa-xs"></i>
+                            </button>
+                          </div>
+                          {/* ------------------------------------------- */}
+
+                        </div>
                       </div>
                     </div>
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => removeItem(it.id)}>
-                      <i className="fas fa-trash"></i>
-                    </button>
                   </div>
                 ))}
               </div>
 
-              <hr />
+              <div className="border-top pt-3 mt-2 bg-light px-3 pb-3 rounded-top">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <span className="h5 mb-0 text-muted">Total a Pagar</span>
+                  <span className="h3 mb-0 fw-bold text-primary">
+                    {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(total)}
+                  </span>
+                </div>
 
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <strong>Total: {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(total)}</strong>
-                <button className="btn btn-outline-danger btn-sm" onClick={clear}>
-                  <i className="fas fa-trash me-1"></i>Vaciar
-                </button>
-              </div>
-
-              <div className="d-grid gap-2">
-                <button className="btn btn-success" onClick={procederPago}>
-                  <i className="fas fa-credit-card me-2"></i>Proceder al Pago
-                </button>
-                <button className="btn btn-outline-secondary" data-bs-dismiss="offcanvas">
-                  Seguir Comprando
-                </button>
+                <div className="d-grid gap-2">
+                  <button className="btn btn-primary btn-lg rounded-pill shadow" onClick={procederPago}>
+                    Pagar Ahora <i className="fas fa-credit-card ms-2"></i>
+                  </button>
+                  <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={clear}>
+                    Vaciar Carrito
+                  </button>
+                </div>
               </div>
             </>
           )}

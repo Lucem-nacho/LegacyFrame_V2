@@ -2,6 +2,11 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
+// Asegúrate de que la ruta de tu logo sea correcta
+// Si usas la carpeta public, sería: src="/assets/logo.png"
+// Si usas import, descomenta la línea de abajo y usa {logo}
+// import logo from '../assets/logo.png'; 
+
 const Navbar = () => {
   const { count } = useCart();
   const { user, logout } = useAuth();
@@ -10,9 +15,10 @@ const Navbar = () => {
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid"> 
         <Link className="navbar-brand" to="/">
-          {/* CORRECCIÓN: Usamos la ruta de texto directa a la carpeta public */}
+          {/* Usamos la ruta pública directa que configuramos antes */}
           <img className="logo-brand" src="/assets/logo.png" alt="Legacy Frames" />
         </Link>
+        
         <button 
           className="navbar-toggler" 
           type="button" 
@@ -24,6 +30,7 @@ const Navbar = () => {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
+
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
@@ -32,9 +39,11 @@ const Navbar = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/cuadros">Cuadros</Link>
             </li>
-            <li className="nav-item dropdown">
-              {/* Puedes agregar más items aquí si es necesario */}
+            {/* --- NUEVO: ENLACE A CONTACTO --- */}
+            <li className="nav-item">
+              <Link className="nav-link" to="/contacto">Contacto</Link>
             </li>
+            {/* -------------------------------- */}
           </ul>
           
           <div className="d-flex align-items-center">
@@ -60,7 +69,7 @@ const Navbar = () => {
               {user ? (
                 <>
                   {/* Mostrar email y rol si el usuario está autenticado */}
-                  <span className="text-light me-3">
+                  <span className="text-light me-3 d-none d-lg-inline">
                     {user.email}
                     {user.isAdmin && (
                       <span className="badge bg-warning text-dark ms-2">
@@ -75,8 +84,7 @@ const Navbar = () => {
                       <i className="fas fa-cogs me-1"></i> Panel
                     </Link>
                   )}
-                  {/* ----------------------------- */}
-
+                  
                   <button className="btn btn-outline-light btn-sm" onClick={logout}>
                     <i className="fas fa-sign-out-alt me-1"></i>Salir
                   </button>

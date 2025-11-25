@@ -8,16 +8,17 @@ export interface CartItem {
   image?: string;
   price?: number; 
   quantity: number;
-  stockMax: number; // <--- NUEVO CAMPO OBLIGATORIO
+  stockMax: number;
 }
 
 interface CartContextValue {
   items: CartItem[];
   count: number;
   total: number;
-  // Modificamos addItem para recibir el stock máximo
   addItem: (item: Omit<CartItem, "quantity">) => void; 
   removeItem: (id: string) => void;
+  increaseItem: (id: string) => void; // <--- IMPORTANTE
+  decreaseItem: (id: string) => void; // <--- IMPORTANTE
   clear: () => void;
 }
 
@@ -29,7 +30,7 @@ export const useCart = () => {
   return ctx;
 };
 
-const STORAGE_KEY = "legacyframe_cart_v3"; // Cambiamos versión para limpiar cache viejo
+const STORAGE_KEY = "legacyframe_cart_v5"; // Versión nueva para limpiar cache
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>(() => {
@@ -49,29 +50,47 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setItems((prev) => {
       const idx = prev.findIndex((p) => p.id === newItem.id);
       
-      // CASO 1: El producto YA está en el carrito
       if (idx >= 0) {
-        const currentQty = prev[idx].quantity;
-        
-        // --- VALIDACIÓN DE STOCK ---
-        if (currentQty >= newItem.stockMax) {
-          alert(`¡No puedes agregar más! Solo quedan ${newItem.stockMax} unidades disponibles.`);
-          return prev; // No hacemos cambios
+        if (prev[idx].quantity >= newItem.stockMax) {
+          alert(`¡No puedes agregar más! Solo quedan ${newItem.stockMax} unidades.`);
+          return prev;
         }
-
         const clone = [...prev];
         clone[idx] = { ...clone[idx], quantity: clone[idx].quantity + 1 };
         return clone;
       }
       
-      // CASO 2: Producto nuevo en el carrito
       if (newItem.stockMax < 1) {
-        alert("Este producto está agotado.");
+        alert("Producto agotado.");
         return prev;
       }
       
       return [...prev, { ...newItem, quantity: 1 }];
     });
+  };
+
+  // FUNCIONES DE CANTIDAD
+  const increaseItem = (id: string) => {
+    setItems(prev => prev.map(item => {
+      if (item.id === id) {
+        if (item.quantity < item.stockMax) {
+          return { ...item, quantity: item.quantity + 1 };
+        } else {
+          alert(`Stock máximo alcanzado (${item.stockMax} un.)`);
+          return item;
+        }
+      }
+      return item;
+    }));
+  };
+
+  const decreaseItem = (id: string) => {
+    setItems(prev => prev.map(item => {
+      if (item.id === id && item.quantity > 1) {
+        return { ...item, quantity: item.quantity - 1 };
+      }
+      return item;
+    }));
   };
 
   const removeItem = (id: string) => setItems((prev) => prev.filter((p) => p.id !== id));
@@ -81,7 +100,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const total = useMemo(() => items.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0), [items]);
 
   return (
-    <CartContext.Provider value={{ items, count, total, addItem, removeItem, clear }}>
+    <CartContext.Provider value={{ items, count, total, addItem, removeItem, increaseItem, decreaseItem, clear }}>
       {children}
     </CartContext.Provider>
   );

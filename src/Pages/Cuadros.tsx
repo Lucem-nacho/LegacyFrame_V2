@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import ProductDetailModal from '../components/ProductDetailModal';
 
-const placeholder = "https://via.placeholder.com/300x300?text=Sin+Foto";
+const placeholder = "https://via.placeholder.com/300x300/cccccc/000000?text=Sin+Imagen";
 
 interface Product {
   id: number; 
@@ -16,6 +16,7 @@ interface Product {
   badgeColor: string;
   whatsappText: string;
   stock: number;
+  categoriaIdOriginal: number; // Para editar
 }
 
 interface BackendProduct {
@@ -45,44 +46,59 @@ const Cuadros = () => {
   const [modalProducto, setModalProducto] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
+  const [allCategories, setAllCategories] = useState<BackendCategory[]>([]);
+
+  // --- ESTADOS PARA EDICIÓN ---
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState({
+    id: 0,
+    nombre: "",
+    descripcion: "",
+    precio: "",
+    stock: "",
+    imagenUrl: "",
+    categoriaId: ""
+  });
+
+  const cargarDatos = async () => {
+    try {
+      const [resProductos, resCategorias] = await Promise.all([
+          axios.get<BackendProduct[]>("http://localhost:8083/api/catalog/productos"),
+          axios.get<BackendCategory[]>("http://localhost:8083/api/catalog/categorias")
+      ]);
+
+      const todosLosProductos = resProductos.data;
+      const todasLasCategorias = resCategorias.data;
+      setAllCategories(todasLasCategorias);
+      
+      const catCuadros = todasLasCategorias.find(c => c.nombre && c.nombre.trim().toLowerCase() === "cuadros");
+      const idCuadros = catCuadros ? catCuadros.id : -999;
+
+      const soloCuadros = todosLosProductos.filter(p => p.categoria.id === idCuadros);
+
+      const mappedProducts: Product[] = soloCuadros.map((p) => ({
+        id: p.id,
+        name: p.nombre,
+        price: p.precio,
+        image: p.imagenUrl ? p.imagenUrl : placeholder,
+        description: p.descripcion || "Sin descripción",
+        badge: p.stock === 0 ? "Agotado" : (p.stock < 5 ? "¡Últimas Unidades!" : "Disponible"),
+        badgeColor: p.stock === 0 ? "bg-danger" : (p.stock < 5 ? "bg-warning text-dark" : "bg-success"),
+        whatsappText: `Hola, me interesa el cuadro ${p.nombre}`,
+        stock: p.stock,
+        categoriaIdOriginal: p.categoria.id
+      }));
+
+      setProducts(mappedProducts);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error cargando cuadros:", error);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchCuadros = async () => {
-      try {
-        const [resProductos, resCategorias] = await Promise.all([
-            axios.get<BackendProduct[]>("http://localhost:8083/api/catalog/productos"),
-            axios.get<BackendCategory[]>("http://localhost:8083/api/catalog/categorias")
-        ]);
-
-        const todosLosProductos = resProductos.data;
-        const todasLasCategorias = resCategorias.data;
-        
-        const catCuadros = todasLasCategorias.find(c => c.nombre && c.nombre.trim().toLowerCase() === "cuadros");
-        const idCuadros = catCuadros ? catCuadros.id : -999;
-
-        const soloCuadros = todosLosProductos.filter(p => p.categoria.id === idCuadros);
-
-        const mappedProducts: Product[] = soloCuadros.map((p) => ({
-          id: p.id,
-          name: p.nombre,
-          price: p.precio,
-          image: p.imagenUrl ? p.imagenUrl : placeholder,
-          description: p.descripcion || "Sin descripción",
-          badge: p.stock === 0 ? "Agotado" : (p.stock < 5 ? "¡Últimas Unidades!" : "Disponible"),
-          badgeColor: p.stock === 0 ? "bg-danger" : (p.stock < 5 ? "bg-warning text-dark" : "bg-success"),
-          whatsappText: `Hola, me interesa el cuadro ${p.nombre}`,
-          stock: p.stock
-        }));
-
-        setProducts(mappedProducts);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error cargando cuadros:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchCuadros();
+    cargarDatos();
   }, []);
 
   const agregarAlCarrito = (product: Product) => {
@@ -91,9 +107,45 @@ const Cuadros = () => {
       name: product.name,
       price: product.price,
       image: product.image,
-      stockMax: product.stock // <--- IMPORTANTE: Pasamos el stock real
+      stockMax: product.stock
     });
     setModalProducto(null);
+  };
+
+  // --- FUNCIONES DE EDICIÓN ---
+  const handleEditClick = (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation(); 
+    setEditData({
+      id: product.id,
+      nombre: product.name,
+      descripcion: product.description,
+      precio: product.price.toString(),
+      stock: product.stock.toString(),
+      imagenUrl: product.image,
+      categoriaId: product.categoriaIdOriginal.toString()
+    });
+    setShowEditModal(true);
+  };
+
+  const handleGuardarCambios = async () => {
+    try {
+      const payload = {
+        nombre: editData.nombre,
+        descripcion: editData.descripcion,
+        precio: parseFloat(editData.precio),
+        stock: parseInt(editData.stock),
+        imagenUrl: editData.imagenUrl || placeholder,
+        categoria: { id: parseInt(editData.categoriaId) }
+      };
+
+      await axios.put(`http://localhost:8083/api/catalog/productos/${editData.id}`, payload);
+      alert("¡Producto actualizado!");
+      setShowEditModal(false);
+      cargarDatos();
+    } catch (error) {
+      console.error("Error actualizando:", error);
+      alert("Error al guardar cambios.");
+    }
   };
 
   if (loading) return <div className="container py-5 text-center"><div className="spinner-border text-primary"></div></div>;
@@ -111,11 +163,17 @@ const Cuadros = () => {
             <div key={product.id} className="col-md-6 col-lg-4 col-xl-3">
               <div className="card h-100 shadow-sm border-0 product-card">
                 <span className={`badge ${product.badgeColor} position-absolute top-0 start-0 m-3 shadow-sm`}>{product.badge}</span>
+                
+                {/* BOTÓN EDITAR (SOLO ADMIN) */}
                 {user?.isAdmin && (
-                   <button className="btn btn-sm btn-warning position-absolute top-0 end-0 m-3" onClick={(e) => { e.stopPropagation(); alert("Edición próximamente"); }}>
-                      <i className="fas fa-edit"></i>
+                   <button 
+                      className="btn btn-sm btn-warning position-absolute top-0 end-0 m-3 z-3 shadow" 
+                      onClick={(e) => handleEditClick(product, e)}
+                   >
+                      <i className="fas fa-edit text-dark"></i>
                    </button>
                 )}
+
                 <div style={{ cursor: 'pointer', height: '250px', overflow: 'hidden' }} onClick={() => setModalProducto(product)}>
                   <img src={product.image} alt={product.name} className="card-img-top w-100 h-100 object-fit-cover" onError={(e) => { e.currentTarget.src = placeholder; }} />
                 </div>
@@ -163,6 +221,59 @@ const Cuadros = () => {
           onAddToCart={() => agregarAlCarrito(modalProducto)}
         />
       )}
+
+      {/* --- MODAL DE EDICIÓN --- */}
+      {showEditModal && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1055 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header bg-warning">
+                <h5 className="modal-title fw-bold text-dark"><i className="fas fa-edit me-2"></i>Editar Producto</h5>
+                <button type="button" className="btn-close" onClick={() => setShowEditModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <form>
+                  <div className="mb-3">
+                    <label className="form-label">Nombre</label>
+                    <input type="text" className="form-control" value={editData.nombre} onChange={e => setEditData({...editData, nombre: e.target.value})} />
+                  </div>
+                  <div className="row">
+                    <div className="col-6 mb-3">
+                      <label className="form-label">Precio</label>
+                      <input type="number" className="form-control" value={editData.precio} onChange={e => setEditData({...editData, precio: e.target.value})} />
+                    </div>
+                    <div className="col-6 mb-3">
+                      <label className="form-label">Stock</label>
+                      <input type="number" className="form-control" value={editData.stock} onChange={e => setEditData({...editData, stock: e.target.value})} />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Categoría</label>
+                    <select className="form-select" value={editData.categoriaId} onChange={e => setEditData({...editData, categoriaId: e.target.value})}>
+                      {allCategories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Imagen URL</label>
+                    <input type="text" className="form-control" value={editData.imagenUrl} onChange={e => setEditData({...editData, imagenUrl: e.target.value})} />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Descripción</label>
+                    <textarea className="form-control" rows={3} value={editData.descripcion} onChange={e => setEditData({...editData, descripcion: e.target.value})}></textarea>
+                  </div>
+                </form>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowEditModal(false)}>Cancelar</button>
+                <button type="button" className="btn btn-primary" onClick={handleGuardarCambios}>Guardar Cambios</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
