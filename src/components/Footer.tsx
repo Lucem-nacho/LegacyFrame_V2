@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // <--- IMPORTAMOS EL CONTEXTO
 
 const Footer = () => {
+  const { user } = useAuth(); // <--- OBTENEMOS EL USUARIO
+
   return (
     <footer className="footer mt-5">
       <div className="container">
@@ -29,21 +32,26 @@ const Footer = () => {
               <li><Link to="/cuadros">Cuadros</Link></li>
               <li><Link to="/molduras">Molduras</Link></li>
               <li><Link to="/contacto">Contacto</Link></li>
-              <li><Link to="/login">Iniciar Sesión</Link></li>
+              
+              {/* LÓGICA: Solo mostramos Login si NO hay usuario */}
+              {!user && (
+                <li><Link to="/login">Iniciar Sesión</Link></li>
+              )}
+              
+              {/* Si es admin, mostramos acceso directo al panel */}
+              {user?.isAdmin && (
+                 <li><Link to="/admin" className="text-warning">Panel Admin</Link></li>
+              )}
             </ul>
           </div>
 
-          {/* Información de Contacto */}
+          {/* Contacto */}
           <div className="col-lg-3 col-md-6 mb-4">
             <h5 className="footer-title">Contacto</h5>
             <div className="footer-contact">
               <div className="contact-item">
                 <i className="fas fa-phone"></i>
-                <span>227 916 878</span>
-              </div>
-              <div className="contact-item">
-                <i className="fas fa-phone"></i>
-                <span>227 237 949</span>
+                <span>+56 9 1234 5678</span>
               </div>
               <div className="contact-item">
                 <i className="fas fa-envelope"></i>
@@ -60,23 +68,13 @@ const Footer = () => {
           <div className="col-lg-3 col-md-6 mb-4">
             <h5 className="footer-title">Síguenos</h5>
             <div className="footer-social">
-              <a href="#" className="social-link">
-                <i className="fab fa-facebook-f"></i>
-                <span>Facebook</span>
-              </a>
-              <a href="#" className="social-link">
-                <i className="fab fa-instagram"></i>
-                <span>Instagram</span>
-              </a>
-              <a href="#" className="social-link">
-                <i className="fab fa-whatsapp"></i>
-                <span>WhatsApp</span>
-              </a>
+              <a href="#" className="social-link"><i className="fab fa-facebook-f"></i></a>
+              <a href="#" className="social-link"><i className="fab fa-instagram"></i></a>
+              <a href="#" className="social-link"><i className="fab fa-whatsapp"></i></a>
             </div>
           </div>
         </div>
 
-        {/* Línea separadora y copyright */}
         <hr className="footer-divider" />
         <div className="row">
           <div className="col-12 text-center">

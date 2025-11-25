@@ -4,129 +4,130 @@ import axios from "axios";
 const Contacto: React.FC = () => {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
-  const [mensaje, setMensaje] = useState("");
-  const [mensajeError, setMensajeError] = useState<string | null>(null);
+  const [mensaje, setMensaje] = useState(""); // Esto coincide con tu backend
+  
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Errores de validación visual
   const [nombreError, setNombreError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
-
-  const [loading, setLoading] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [mensajeError, setMensajeError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setMensajeError(null);
+    setSuccessMsg(null);
+    setErrorMsg(null);
     setNombreError(null);
     setEmailError(null);
-    setServerError(null);
-    setSuccessMsg(null);
+    setMensajeError(null);
 
-    let isValid = true;
+    // Validaciones simples
+    let valid = true;
+    if (!nombre.trim()) { setNombreError("Nombre obligatorio"); valid = false; }
+    if (!email.trim()) { setEmailError("Email obligatorio"); valid = false; }
+    if (!mensaje.trim()) { setMensajeError("Mensaje obligatorio"); valid = false; }
 
-    if (!nombre.trim()) {
-      setNombreError("El nombre es obligatorio.");
-      isValid = false;
-    }
+    if (!valid) return;
 
-    if (!email.trim()) {
-      setEmailError("El email es obligatorio.");
-      isValid = false;
-    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setEmailError("El formato del email no es válido.");
-      isValid = false;
-    }
-
-    const charCount = mensaje.length;
-    if (charCount < 10) {
-      setMensajeError("El mensaje debe tener al menos 10 caracteres.");
-      isValid = false;
-    } else if (charCount > 300) {
-      setMensajeError("El mensaje no puede exceder los 300 caracteres.");
-      isValid = false;
-    }
-
-    if (!isValid) return;
+    setLoading(true);
 
     try {
-      setLoading(true);
-      const resp = await axios.post(`http://localhost:8081/api/contactos`, {
-        nombre,
-        email,
-        mensaje,
+      // --- CONEXIÓN AL MS_CONTACTO (Puerto 8081) ---
+      // Endpoint: http://localhost:8081/api/contactos
+      await axios.post("http://localhost:8081/api/contactos", {
+        nombre: nombre,
+        email: email,
+        mensaje: mensaje // En Java se llama 'mensaje'
       });
-
-      if (resp.status === 200 || resp.status === 201) {
-        setSuccessMsg("Mensaje enviado correctamente. Gracias.");
-        setNombre("");
-        setEmail("");
-        setMensaje("");
-      } else {
-        setServerError("No fue posible enviar el mensaje. Intenta nuevamente.");
-      }
-    } catch (err: any) {
-      // Si no hay respuesta del servidor (network/CORS/timeouts) mostramos mensaje personalizado
-      if (!err?.response) {
-        setServerError("No fue posible enviar el mensaje. Intenta nuevamente.");
-      } else {
-        // Si el servidor respondió, preferimos el mensaje que venga en la respuesta
-        const msg = err.response?.data?.message || err.message || "Error de conexión con el servidor.";
-        setServerError(msg);
-      }
+      
+      setSuccessMsg("¡Mensaje enviado con éxito! Te responderemos pronto.");
+      setNombre("");
+      setEmail("");
+      setMensaje("");
+    } catch (error) {
+      console.error("Error enviando mensaje:", error);
+      setErrorMsg("Hubo un error al conectar con el servidor de contacto.");
     } finally {
       setLoading(false);
     }
-  }; // <-- cierre de handleSubmit agregado
+  };
 
   return (
-    <div className="contact-page-container">
-      <div className="text-center">
-        <h1 className="fw-bold display-5 mb-3">Contacto 📬</h1>
-        <p className="lead mb-4">
-          Completa el formulario y nos pondremos en contacto contigo.
-        </p>
+    <div className="container py-5">
+      <div className="row justify-content-center">
+        <div className="col-lg-8 text-center mb-5">
+          <h1 className="display-4 fw-bold text-primary">Contáctanos</h1>
+          <p className="lead text-muted">Estamos aquí para resolver tus dudas.</p>
+        </div>
+      </div>
 
-        {serverError && <div className="alert alert-danger">{serverError}</div>}
-        {successMsg && <div className="alert alert-success">{successMsg}</div>}
+      <div className="row justify-content-center">
+        <div className="col-lg-6">
+          <div className="card shadow-sm border-0 p-4">
+            <div className="card-body">
+              {successMsg && <div className="alert alert-success">{successMsg}</div>}
+              {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
 
-        <form onSubmit={handleSubmit} className="w-100 form-max-500 text-start" noValidate>
-          <div className="mb-3">
-            <label className="form-label">Nombre</label>
-            <input
-              type="text"
-              className={`form-control ${nombreError ? "is-invalid" : ""}`}
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-            />
-            {nombreError && <div className="invalid-feedback">{nombreError}</div>}
+              <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                  <label className="form-label">Nombre Completo</label>
+                  <input
+                    type="text"
+                    className={`form-control ${nombreError ? "is-invalid" : ""}`}
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    placeholder="Ej: Juan Pérez"
+                  />
+                  {nombreError && <div className="invalid-feedback">{nombreError}</div>}
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Correo Electrónico</label>
+                  <input
+                    type="email"
+                    className={`form-control ${emailError ? "is-invalid" : ""}`}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="nombre@ejemplo.com"
+                  />
+                  {emailError && <div className="invalid-feedback">{emailError}</div>}
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Tu Mensaje</label>
+                  <textarea
+                    className={`form-control ${mensajeError ? "is-invalid" : ""}`}
+                    rows={5}
+                    value={mensaje}
+                    onChange={(e) => setMensaje(e.target.value)}
+                    placeholder="Cuéntanos qué necesitas..."
+                  />
+                  {mensajeError && <div className="invalid-feedback">{mensajeError}</div>}
+                </div>
+
+                <div className="d-grid">
+                  <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
+                    {loading ? "Enviando..." : "Enviar Mensaje"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
+        </div>
 
-          <div className="mb-3">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className={`form-control ${emailError ? "is-invalid" : ""}`}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {emailError && <div className="invalid-feedback">{emailError}</div>}
+        <div className="col-lg-4 mt-5 mt-lg-0">
+          <div className="p-4 bg-light rounded shadow-sm">
+            <h4 className="mb-4 text-primary">Información</h4>
+            <p className="mb-3"><i className="fas fa-map-marker-alt me-2 text-primary"></i> Departamental 623, Santiago</p>
+            <p className="mb-3"><i className="fas fa-phone me-2 text-primary"></i> +56 9 1234 5678</p>
+            <p className="mb-3"><i className="fas fa-envelope me-2 text-primary"></i> info@legacyframes.cl</p>
+            <hr />
+            <h5 className="mt-4">Horario</h5>
+            <p className="mb-1">Lunes a Viernes: 9:00 - 18:00</p>
           </div>
-
-          <div className="mb-3">
-            <label className="form-label">Mensaje</label>
-            <textarea
-              className={`form-control ${mensajeError ? "is-invalid" : ""}`}
-              rows={5}
-              value={mensaje}
-              onChange={(e) => setMensaje(e.target.value)}
-            />
-            {mensajeError && <div className="invalid-feedback">{mensajeError}</div>}
-            <div className="form-text text-end">{mensaje.length}/300</div>
-          </div>
-
-          <button type="submit" className="btn btn-light w-100" disabled={loading}>
-            {loading ? "Enviando..." : "Enviar Mensaje"}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );

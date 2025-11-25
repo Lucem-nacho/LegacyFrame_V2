@@ -19,10 +19,9 @@ interface Product {
   badge: string;
   badgeColor: string;
   whatsappText: string;
+  stock: number;
 }
 
-// --- CORRECCIÓN CLAVE EN LA INTERFAZ ---
-// Java envía la categoría como un OBJETO dentro del producto, no como un número suelto.
 interface BackendProduct {
   id: number;
   nombre: string;
@@ -30,7 +29,7 @@ interface BackendProduct {
   precio: number;
   stock: number;
   imagenUrl: string;
-  categoria: {   // <--- AQUÍ ESTABA EL DETALLE
+  categoria: {
       id: number;
       nombre: string;
   }; 
@@ -63,25 +62,17 @@ const Molduras = () => {
         const todosLosProductos = resProductos.data;
         const todasLasCategorias = resCategorias.data;
 
-        // 1. Detectar ID de Cuadros
-        const catCuadros = todasLasCategorias.find(c => c.nombre.toLowerCase() === "cuadros");
+        const catCuadros = todasLasCategorias.find(c => c.nombre && c.nombre.trim().toLowerCase() === "cuadros");
         const idCuadros = catCuadros ? catCuadros.id : -999; 
 
-        // 2. FILTRO CORREGIDO: Usamos p.categoria.id
         const soloMolduras = todosLosProductos.filter(p => p.categoria.id !== idCuadros);
 
-        // 3. Mapeo
         const mappedProducts: Product[] = soloMolduras.map((p) => {
-          // Obtenemos el nombre directamente del objeto categoría que viene dentro del producto
-          let catName = p.categoria.nombre.toLowerCase();
-
-          // Ajustes de nombres para coincidir con botones
+          let catName = p.categoria.nombre ? p.categoria.nombre.trim().toLowerCase() : "all";
           if (catName.includes("finger")) catName = "finger-joint";
           
           const validCategories = ["grecas", "rusticas", "naturales", "nativas", "finger-joint"];
-          if (!validCategories.includes(catName)) {
-             catName = "all";
-          }
+          if (!validCategories.includes(catName)) catName = "all";
 
           return {
             id: p.id,
@@ -89,11 +80,12 @@ const Molduras = () => {
             priceFrom: p.precio,
             priceTo: p.precio,
             image: p.imagenUrl ? p.imagenUrl : placeholder, 
-            description: p.descripcion || "Sin descripción",
+            description: p.descripcion || "Sin descripción disponible.",
             category: catName as Category,
-            badge: p.stock > 0 ? "Disponible" : "Agotado",
-            badgeColor: p.stock > 0 ? "bg-success" : "bg-danger",
-            whatsappText: `Hola, me interesa la moldura ${p.nombre}`
+            badge: p.stock === 0 ? "Agotado" : (p.stock < 10 ? "¡Últimas Unidades!" : "Disponible"),
+            badgeColor: p.stock === 0 ? "bg-danger" : (p.stock < 10 ? "bg-warning text-dark" : "bg-success"),
+            whatsappText: `Hola, me interesa la moldura ${p.nombre}`,
+            stock: p.stock
           };
         });
 
@@ -119,18 +111,13 @@ const Molduras = () => {
       id: product.id.toString(), 
       name: product.name,
       price: product.priceFrom,
-      image: product.image
+      image: product.image,
+      stockMax: product.stock // <--- IMPORTANTE: Pasamos el stock real
     });
     setModalProducto(null); 
   };
 
-  if (loading) {
-    return (
-      <div className="container py-5 text-center">
-        <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando...</span></div>
-      </div>
-    );
-  }
+  if (loading) return <div className="container py-5 text-center"><div className="spinner-border text-primary"></div></div>;
 
   return (
     <div className="container py-5">
@@ -161,14 +148,21 @@ const Molduras = () => {
                 </div>
                 <div className="card-body text-center d-flex flex-column">
                   <h5 className="card-title fw-bold text-dark mb-1">{product.name}</h5>
-                  <div className="mt-auto">
-                    <div className="mb-3"><span className="fs-5 fw-bold text-primary">{CLP.format(product.priceFrom)}</span></div>
-                    <div className="d-grid gap-2">
-                      <button className="btn btn-outline-primary rounded-pill" onClick={() => setModalProducto(product)}>Ver Detalles</button>
-                      <button className="btn btn-primary rounded-pill shadow-sm" onClick={() => agregarAlCarrito(product)} disabled={product.badge === "Agotado"}>
-                        <i className="fas fa-shopping-cart me-2"></i>Agregar
-                      </button>
-                    </div>
+                  <p className="text-muted small mb-2 text-truncate">{product.description}</p>
+                  
+                  <div className="mb-3">
+                    <span className="fs-5 fw-bold text-primary d-block">{CLP.format(product.priceFrom)}</span>
+                    <small className={`fw-bold ${product.stock < 5 ? 'text-danger' : 'text-success'}`}>
+                        <i className="fas fa-box-open me-1"></i>
+                        {product.stock > 0 ? `Disponibles: ${product.stock}` : "Sin Stock"}
+                    </small>
+                  </div>
+
+                  <div className="mt-auto d-grid gap-2">
+                    <button className="btn btn-outline-primary rounded-pill" onClick={() => setModalProducto(product)}>Ver Detalles</button>
+                    <button className="btn btn-primary rounded-pill shadow-sm" onClick={() => agregarAlCarrito(product)} disabled={product.stock === 0}>
+                      <i className="fas fa-shopping-cart me-2"></i>{product.stock === 0 ? "Agotado" : "Agregar"}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -185,7 +179,8 @@ const Molduras = () => {
             image: modalProducto.image,
             description: modalProducto.description,
             price: modalProducto.priceFrom,
-            whatsappHref: `https://wa.me/56912345678?text=${encodeURIComponent(modalProducto.whatsappText)}`
+            whatsappHref: `https://wa.me/56912345678?text=${encodeURIComponent(modalProducto.whatsappText)}`,
+            stock: modalProducto.stock
           }}
           onAddToCart={() => agregarAlCarrito(modalProducto)}
         />

@@ -6,16 +6,17 @@ export interface CartItem {
   id: string;
   name: string;
   image?: string;
-  price?: number; // precio unitario opcional
-  priceText?: string; // para rangos como en Molduras
+  price?: number; 
   quantity: number;
+  stockMax: number; // <--- NUEVO CAMPO OBLIGATORIO
 }
 
 interface CartContextValue {
   items: CartItem[];
   count: number;
   total: number;
-  addItem: (item: Omit<CartItem, "quantity">, qty?: number) => void;
+  // Modificamos addItem para recibir el stock máximo
+  addItem: (item: Omit<CartItem, "quantity">) => void; 
   removeItem: (id: string) => void;
   clear: () => void;
 }
@@ -28,7 +29,7 @@ export const useCart = () => {
   return ctx;
 };
 
-const STORAGE_KEY = "legacyframe_cart_v1";
+const STORAGE_KEY = "legacyframe_cart_v3"; // Cambiamos versión para limpiar cache viejo
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>(() => {
@@ -41,31 +42,47 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch {
-      // Ignorar errores de almacenamiento (modo privado o sin permisos)
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem: CartContextValue["addItem"] = (item, qty = 1) => {
+  const addItem = (newItem: Omit<CartItem, "quantity">) => {
     setItems((prev) => {
-      const idx = prev.findIndex((p) => p.id === item.id);
+      const idx = prev.findIndex((p) => p.id === newItem.id);
+      
+      // CASO 1: El producto YA está en el carrito
       if (idx >= 0) {
+        const currentQty = prev[idx].quantity;
+        
+        // --- VALIDACIÓN DE STOCK ---
+        if (currentQty >= newItem.stockMax) {
+          alert(`¡No puedes agregar más! Solo quedan ${newItem.stockMax} unidades disponibles.`);
+          return prev; // No hacemos cambios
+        }
+
         const clone = [...prev];
-        clone[idx] = { ...clone[idx], quantity: clone[idx].quantity + qty };
+        clone[idx] = { ...clone[idx], quantity: clone[idx].quantity + 1 };
         return clone;
       }
-      return [...prev, { ...item, quantity: qty }];
+      
+      // CASO 2: Producto nuevo en el carrito
+      if (newItem.stockMax < 1) {
+        alert("Este producto está agotado.");
+        return prev;
+      }
+      
+      return [...prev, { ...newItem, quantity: 1 }];
     });
   };
 
   const removeItem = (id: string) => setItems((prev) => prev.filter((p) => p.id !== id));
   const clear = () => setItems([]);
 
-  const count = useMemo(() => items.reduce((acc, it) => acc + it.quantity, 0), [items]);
-  const total = useMemo(() => items.reduce((acc, it) => acc + (it.price ?? 0) * it.quantity, 0), [items]);
+  const count = useMemo(() => items.reduce((acc, item) => acc + item.quantity, 0), [items]);
+  const total = useMemo(() => items.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0), [items]);
 
-  const value: CartContextValue = { items, count, total, addItem, removeItem, clear };
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={{ items, count, total, addItem, removeItem, clear }}>
+      {children}
+    </CartContext.Provider>
+  );
 };

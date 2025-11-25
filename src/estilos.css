@@ -481,3 +481,54 @@ body {
   background-color: var(--dark-color);
   border-color: var(--dark-color);
 }
+
+/* --- OVERRIDES DE BOOTSTRAP (Para quitar el azul) --- */
+
+:root {
+    --brand-brown: #8B5C2A;
+    --brand-dark: #5C3A1A;
+    --brand-gold: #D4A574;
+}
+
+/* Texto Primario (Títulos, precios) */
+.text-primary {
+    color: var(--brand-brown) !important;
+}
+
+/* Botones Sólidos (Agregar al carrito, Pagar) */
+.btn-primary {
+    background-color: var(--brand-brown) !important;
+    border-color: var(--brand-brown) !important;
+    color: white !important;
+}
+
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+    background-color: var(--brand-dark) !important;
+    border-color: var(--brand-dark) !important;
+}
+
+/* Botones de Borde (Ver Detalles) */
+.btn-outline-primary {
+    color: var(--brand-brown) !important;
+    border-color: var(--brand-brown) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--brand-brown) !important;
+    color: white !important;
+}
+
+/* Iconos y enlaces */
+a {
+    color: var(--brand-brown);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--brand-dark);
+}
+
+/* Spinner de carga */
+.spinner-border.text-primary {
+    color: var(--brand-brown) !important;
+}

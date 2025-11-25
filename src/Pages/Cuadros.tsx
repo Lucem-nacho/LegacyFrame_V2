@@ -15,9 +15,9 @@ interface Product {
   badge: string;
   badgeColor: string;
   whatsappText: string;
+  stock: number;
 }
 
-// --- INTERFAZ CORREGIDA ---
 interface BackendProduct {
   id: number;
   nombre: string;
@@ -25,7 +25,7 @@ interface BackendProduct {
   precio: number;
   stock: number;
   imagenUrl: string;
-  categoria: {      // <--- CAMBIO AQUÍ
+  categoria: {
     id: number;
     nombre: string;
   }; 
@@ -49,7 +49,6 @@ const Cuadros = () => {
   useEffect(() => {
     const fetchCuadros = async () => {
       try {
-        // Pedimos Productos y Categorías
         const [resProductos, resCategorias] = await Promise.all([
             axios.get<BackendProduct[]>("http://localhost:8083/api/catalog/productos"),
             axios.get<BackendCategory[]>("http://localhost:8083/api/catalog/categorias")
@@ -58,12 +57,9 @@ const Cuadros = () => {
         const todosLosProductos = resProductos.data;
         const todasLasCategorias = resCategorias.data;
         
-        // 1. Detectar ID de Cuadros dinámicamente
-        const catCuadros = todasLasCategorias.find(c => c.nombre.toLowerCase() === "cuadros");
+        const catCuadros = todasLasCategorias.find(c => c.nombre && c.nombre.trim().toLowerCase() === "cuadros");
         const idCuadros = catCuadros ? catCuadros.id : -999;
 
-        // 2. FILTRAR: Solo dejamos pasar lo que tenga ID de cuadros
-        // USAMOS p.categoria.id (Objeto anidado)
         const soloCuadros = todosLosProductos.filter(p => p.categoria.id === idCuadros);
 
         const mappedProducts: Product[] = soloCuadros.map((p) => ({
@@ -72,9 +68,10 @@ const Cuadros = () => {
           price: p.precio,
           image: p.imagenUrl ? p.imagenUrl : placeholder,
           description: p.descripcion || "Sin descripción",
-          badge: p.stock < 10 ? "Últimas Unidades" : "Disponible",
-          badgeColor: p.stock < 10 ? "bg-warning text-dark" : "bg-success",
-          whatsappText: `Hola, me interesa el cuadro ${p.nombre}`
+          badge: p.stock === 0 ? "Agotado" : (p.stock < 5 ? "¡Últimas Unidades!" : "Disponible"),
+          badgeColor: p.stock === 0 ? "bg-danger" : (p.stock < 5 ? "bg-warning text-dark" : "bg-success"),
+          whatsappText: `Hola, me interesa el cuadro ${p.nombre}`,
+          stock: p.stock
         }));
 
         setProducts(mappedProducts);
@@ -93,18 +90,13 @@ const Cuadros = () => {
       id: product.id.toString(), 
       name: product.name,
       price: product.price,
-      image: product.image
+      image: product.image,
+      stockMax: product.stock // <--- IMPORTANTE: Pasamos el stock real
     });
     setModalProducto(null);
   };
 
-  if (loading) {
-    return (
-        <div className="container py-5 text-center">
-          <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando...</span></div>
-        </div>
-      );
-  }
+  if (loading) return <div className="container py-5 text-center"><div className="spinner-border text-primary"></div></div>;
 
   return (
     <div className="container py-5">
@@ -129,14 +121,21 @@ const Cuadros = () => {
                 </div>
                 <div className="card-body text-center d-flex flex-column">
                   <h5 className="card-title fw-bold text-dark mb-1">{product.name}</h5>
-                  <div className="mt-auto">
-                    <div className="mb-3"><span className="fs-5 fw-bold text-primary">{CLP.format(product.price)}</span></div>
-                    <div className="d-grid gap-2">
-                      <button className="btn btn-outline-primary rounded-pill" onClick={() => setModalProducto(product)}>Ver Detalles</button>
-                      <button className="btn btn-primary rounded-pill shadow-sm" onClick={() => agregarAlCarrito(product)}>
-                        <i className="fas fa-shopping-cart me-2"></i>Agregar
-                      </button>
-                    </div>
+                  <p className="text-muted small mb-2 text-truncate">{product.description}</p>
+                  
+                  <div className="mb-3">
+                    <span className="fs-5 fw-bold text-primary d-block">{CLP.format(product.price)}</span>
+                    <small className={`fw-bold ${product.stock < 5 ? 'text-danger' : 'text-success'}`}>
+                        <i className="fas fa-box-open me-1"></i>
+                        {product.stock > 0 ? `Disponibles: ${product.stock}` : "Sin Stock"}
+                    </small>
+                  </div>
+
+                  <div className="mt-auto d-grid gap-2">
+                    <button className="btn btn-outline-primary rounded-pill" onClick={() => setModalProducto(product)}>Ver Detalles</button>
+                    <button className="btn btn-primary rounded-pill shadow-sm" onClick={() => agregarAlCarrito(product)} disabled={product.stock === 0}>
+                      <i className="fas fa-shopping-cart me-2"></i>{product.stock === 0 ? "Agotado" : "Agregar"}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -158,7 +157,8 @@ const Cuadros = () => {
             image: modalProducto.image,
             description: modalProducto.description,
             price: modalProducto.price,
-            whatsappHref: `https://wa.me/56912345678?text=${encodeURIComponent(modalProducto.whatsappText)}`
+            whatsappHref: `https://wa.me/56912345678?text=${encodeURIComponent(modalProducto.whatsappText)}`,
+            stock: modalProducto.stock
           }}
           onAddToCart={() => agregarAlCarrito(modalProducto)}
         />
