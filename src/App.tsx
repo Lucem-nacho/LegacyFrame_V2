@@ -13,6 +13,7 @@ import Terminos from "./Pages/Terminos";
 import PagoExitoso from "./Pages/PagoExitoso";
 import AdminRoute from "./components/AdminRoute";
 import AdminPanel from "./Pages/AdminPanel";
+import Perfil from "./Pages/Perfil"; // <--- IMPORTANTE: Importamos la nueva página
 import { useAuth } from "./context/AuthContext";
 
 function App() {
@@ -61,6 +62,11 @@ function App() {
           <Route path="/terminos" element={<Terminos />} />
           <Route path="/registro" element={<Registro />} />
           <Route path="/login" element={<Login />} />
+          
+          {/* --- NUEVA RUTA AGREGADA --- */}
+          <Route path="/perfil" element={<Perfil />} />
+          {/* --------------------------- */}
+
           <Route path="/pago-exitoso" element={<PagoExitoso />} />
           
           <Route path="/admin" element={
@@ -121,9 +127,8 @@ function App() {
                             </button>
                           </div>
                           
-                          {/* --- NUEVOS CONTROLES DE CANTIDAD ELEGANTES --- */}
+                          {/* --- CONTROLES DE CANTIDAD --- */}
                           <div className="d-flex align-items-center border rounded-pill px-2 py-1 shadow-sm bg-white mt-2" style={{ width: 'fit-content' }}>
-                            {/* Botón Menos */}
                             <button 
                               className={`btn btn-sm border-0 p-0 d-flex align-items-center justify-content-center ${it.quantity <= 1 ? 'text-muted' : 'text-dark'}`}
                               style={{ width: '24px', height: '24px' }}
@@ -133,12 +138,10 @@ function App() {
                               <i className="fas fa-minus fa-xs"></i>
                             </button>
                             
-                            {/* Cantidad */}
                             <span className="mx-3 fw-bold text-dark small user-select-none" style={{minWidth: '20px', textAlign: 'center'}}>
                                 {it.quantity}
                             </span>
                             
-                            {/* Botón Más (Color Primario) */}
                             <button 
                               className="btn btn-sm border-0 p-0 text-primary d-flex align-items-center justify-content-center"
                               style={{ width: '24px', height: '24px' }}
@@ -147,7 +150,6 @@ function App() {
                               <i className="fas fa-plus fa-xs"></i>
                             </button>
                           </div>
-                          {/* ------------------------------------------- */}
 
                         </div>
                       </div>

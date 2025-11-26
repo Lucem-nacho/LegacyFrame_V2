@@ -47,6 +47,7 @@ interface Usuario {
 const CLP = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
 
 const AdminPanel = () => {
+  // Datos del Dashboard
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
@@ -55,7 +56,7 @@ const AdminPanel = () => {
   
   const [loading, setLoading] = useState(true);
 
-  // Estados para el Formulario
+  // Estados para el Formulario (Crear/Editar)
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -68,17 +69,16 @@ const AdminPanel = () => {
     categoriaId: "" 
   });
 
+  // Cargar datos iniciales
   useEffect(() => {
     cargarDatos();
   }, []);
 
-  // --- AQUÍ ESTÁ EL ARREGLO ---
   const cargarDatos = async () => {
     try {
       setLoading(true);
       
-      // 1. CARGA SEGURA (Datos que NO requieren rol de Admin estricto o son públicos)
-      // Si esto falla, es porque se cayeron los servidores.
+      // 1. CARGA DE DATOS PRINCIPALES (Productos, Pedidos, Mensajes)
       const [resPed, resProd, resMsg, resCat] = await Promise.all([
         axios.get("http://localhost:8084/api/orders/admin/all"),
         axios.get("http://localhost:8083/api/catalog/productos"),
@@ -91,8 +91,7 @@ const AdminPanel = () => {
       setMensajes(resMsg.data);
       setCategorias(resCat.data);
 
-      // 2. CARGA DELICADA (Usuarios - Requiere ser ADMIN real)
-      // Lo ponemos en un try-catch separado para que si falla, NO rompa lo demás.
+      // 2. CARGA DE USUARIOS (Separada para no bloquear si no es ADMIN)
       try {
           const token = localStorage.getItem("token");
           if (token) {
@@ -102,23 +101,44 @@ const AdminPanel = () => {
               setUsuarios(resUsers.data);
           }
       } catch (authError) {
-          console.warn("No se pudo cargar la lista de usuarios. Tal vez no eres ADMIN o el token expiró.");
-          // No hacemos nada, simplemente la lista de usuarios quedará vacía.
+          console.warn("No se pudo cargar la lista de usuarios. Verifica permisos de ADMIN.");
       }
       
       setLoading(false);
     } catch (error) {
-      console.error("Error cargando datos principales:", error);
+      console.error("Error cargando datos generales:", error);
       setLoading(false);
     }
   };
 
+  // --- FUNCIÓN ELIMINAR PRODUCTO (NUEVA) ---
+  const handleEliminar = async (id: number) => {
+    if (!window.confirm("¿Estás seguro de que quieres eliminar este producto? Esta acción no se puede deshacer.")) {
+      return;
+    }
+
+    try {
+      // Llamada al endpoint DELETE que creamos en ProductoController
+      await axios.delete(`http://localhost:8083/api/catalog/productos/${id}`);
+      
+      // Actualizamos la tabla visualmente quitando el producto borrado
+      setProductos((prev) => prev.filter((p) => p.id !== id));
+      
+      alert("Producto eliminado correctamente.");
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      alert("Hubo un error al intentar eliminar el producto.");
+    }
+  };
+
+  // --- ABRIR MODAL PARA CREAR ---
   const abrirModalCrear = () => {
-    setEditingId(null);
+    setEditingId(null); 
     setFormData({ nombre: "", descripcion: "", precio: "", stock: "", imagenUrl: "", categoriaId: "" });
     setShowModal(true);
   };
 
+  // --- ABRIR MODAL PARA EDITAR ---
   const abrirModalEditar = (producto: Producto) => {
     setEditingId(producto.id);
     setFormData({
@@ -132,6 +152,7 @@ const AdminPanel = () => {
     setShowModal(true);
   };
 
+  // --- GUARDAR (CREAR O EDITAR) ---
   const handleGuardar = async () => {
     if (!formData.nombre || !formData.precio || !formData.categoriaId) {
       alert("Por favor completa nombre, precio y categoría.");
@@ -144,7 +165,9 @@ const AdminPanel = () => {
       precio: parseFloat(formData.precio),
       stock: parseInt(formData.stock) || 0,
       imagenUrl: formData.imagenUrl || "https://via.placeholder.com/300x300/cccccc/000000?text=Sin+Imagen",
-      categoria: { id: parseInt(formData.categoriaId) }
+      categoria: {
+          id: parseInt(formData.categoriaId)
+      }
     };
 
     try {
@@ -155,8 +178,10 @@ const AdminPanel = () => {
         await axios.post("http://localhost:8083/api/catalog/productos", payload);
         alert("¡Producto creado con éxito!");
       }
+
       setShowModal(false);
-      cargarDatos();
+      cargarDatos(); 
+      
     } catch (error) {
       console.error("Error guardando producto:", error);
       alert("Hubo un error al guardar.");
@@ -258,11 +283,22 @@ const AdminPanel = () => {
                       </td>
                       <td>{CLP.format(prod.precio)}</td>
                       <td>
+                        {/* BOTÓN EDITAR */}
                         <button 
-                          className="btn btn-sm btn-warning text-dark fw-bold"
+                          className="btn btn-sm btn-warning text-dark fw-bold me-2"
                           onClick={() => abrirModalEditar(prod)}
+                          title="Editar"
                         >
-                          <i className="fas fa-edit"></i> Editar
+                          <i className="fas fa-edit"></i>
+                        </button>
+                        
+                        {/* BOTÓN ELIMINAR (NUEVO) */}
+                        <button 
+                          className="btn btn-sm btn-danger text-white"
+                          onClick={() => handleEliminar(prod.id)}
+                          title="Eliminar"
+                        >
+                          <i className="fas fa-trash-alt"></i>
                         </button>
                       </td>
                     </tr>
@@ -353,7 +389,7 @@ const AdminPanel = () => {
                     {usuarios.length === 0 && (
                       <tr><td colSpan={3} className="text-center p-3 text-muted">
                         No se pudo cargar la lista o no hay usuarios. <br/>
-                        <small>(Revisa que estés logueado como ADMIN: admin@legacyframes.cl)</small>
+                        <small>(Debes ser ADMIN para ver esto)</small>
                       </td></tr>
                     )}
                   </tbody>
@@ -365,7 +401,7 @@ const AdminPanel = () => {
 
       </div>
 
-      {/* MODAL */}
+      {/* --- MODAL DINÁMICO (CREAR / EDITAR) --- */}
       {showModal && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
@@ -386,6 +422,7 @@ const AdminPanel = () => {
                       onChange={(e) => setFormData({...formData, nombre: e.target.value})}
                     />
                   </div>
+                  
                   <div className="row">
                     <div className="col-6 mb-3">
                       <label className="form-label">Precio</label>
@@ -404,6 +441,7 @@ const AdminPanel = () => {
                       />
                     </div>
                   </div>
+
                   <div className="mb-3">
                     <label className="form-label">Categoría</label>
                     <select 
@@ -417,6 +455,7 @@ const AdminPanel = () => {
                       ))}
                     </select>
                   </div>
+
                   <div className="mb-3">
                     <label className="form-label">URL Imagen</label>
                     <input 
@@ -425,6 +464,7 @@ const AdminPanel = () => {
                       onChange={(e) => setFormData({...formData, imagenUrl: e.target.value})}
                     />
                   </div>
+
                   <div className="mb-3">
                     <label className="form-label">Descripción</label>
                     <textarea 
@@ -445,6 +485,7 @@ const AdminPanel = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

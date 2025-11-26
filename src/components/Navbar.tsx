@@ -2,23 +2,19 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
-// Asegúrate de que la ruta de tu logo sea correcta
-// Si usas la carpeta public, sería: src="/assets/logo.png"
-// Si usas import, descomenta la línea de abajo y usa {logo}
-// import logo from '../assets/logo.png'; 
-
 const Navbar = () => {
   const { count } = useCart();
   const { user, logout } = useAuth();
 
   return (
-    <nav className="navbar navbar-expand-lg">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
       <div className="container-fluid"> 
+        {/* LOGO */}
         <Link className="navbar-brand" to="/">
-          {/* Usamos la ruta pública directa que configuramos antes */}
-          <img className="logo-brand" src="/assets/logo.png" alt="Legacy Frames" />
+          <img className="logo-brand" src="/assets/logo.png" alt="Legacy Frames" style={{maxHeight: '40px'}} />
         </Link>
         
+        {/* BOTÓN HAMBURGUESA (MÓVIL) */}
         <button 
           className="navbar-toggler" 
           type="button" 
@@ -32,6 +28,7 @@ const Navbar = () => {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
+          {/* ENLACES PRINCIPALES (Izquierda) */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <Link className="nav-link" to="/molduras">Molduras</Link>
@@ -39,23 +36,23 @@ const Navbar = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/cuadros">Cuadros</Link>
             </li>
-            {/* --- NUEVO: ENLACE A CONTACTO --- */}
             <li className="nav-item">
               <Link className="nav-link" to="/contacto">Contacto</Link>
             </li>
-            {/* -------------------------------- */}
           </ul>
           
-          <div className="d-flex align-items-center">
-            {/* Botón del Carrito */}
+          {/* ZONA DERECHA (Carrito + Usuario) */}
+          <div className="d-flex align-items-center flex-wrap gap-2 mt-2 mt-lg-0">
+            
+            {/* BOTÓN DEL CARRITO */}
             <button 
-              className="btn btn-outline-light position-relative me-3" 
+              className="btn btn-outline-light position-relative border-0" 
               type="button" 
               data-bs-toggle="offcanvas" 
               data-bs-target="#carritoOffcanvas" 
               aria-controls="carritoOffcanvas"
             >
-              <i className="fas fa-shopping-cart"></i>
+              <i className="fas fa-shopping-cart fa-lg"></i>
               {count > 0 && (
                 <span 
                   className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
@@ -65,41 +62,43 @@ const Navbar = () => {
               )}
             </button>
             
-            <span id="navbarAuthArea" className="d-flex align-items-center">
-              {user ? (
-                <>
-                  {/* Mostrar email y rol si el usuario está autenticado */}
-                  <span className="text-light me-3 d-none d-lg-inline">
-                    {user.email}
-                    {user.isAdmin && (
-                      <span className="badge bg-warning text-dark ms-2">
-                        <i className="fas fa-crown"></i> ADMIN
-                      </span>
-                    )}
-                  </span>
+            {/* ZONA DE USUARIO */}
+            {user ? (
+              <>
+                {/* --- NUEVO BOTÓN: MI PERFIL (Visible siempre) --- */}
+                <Link 
+                  to="/perfil" 
+                  className="btn btn-outline-light btn-sm d-flex align-items-center"
+                  title={`Sesión iniciada como ${user.email}`}
+                >
+                  <i className="fas fa-user-circle fa-lg me-2"></i>
+                  <span className="fw-bold">Mi Perfil</span>
+                </Link>
+                {/* ----------------------------------------------- */}
 
-                  {/* --- BOTÓN SOLO PARA ADMIN --- */}
-                  {user.isAdmin && (
-                    <Link className="btn btn-warning btn-sm me-2 fw-bold" to="/admin">
-                      <i className="fas fa-cogs me-1"></i> Panel
-                    </Link>
-                  )}
-                  
-                  <button className="btn btn-outline-light btn-sm" onClick={logout}>
-                    <i className="fas fa-sign-out-alt me-1"></i>Salir
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link className="btn btn-outline-dark me-2" to="/registro">
-                    <i className="fas fa-user-plus me-1"></i>Registro
+                {/* BOTÓN ADMIN (SOLO SI ES ADMIN) */}
+                {user.isAdmin && (
+                  <Link className="btn btn-warning btn-sm fw-bold text-dark" to="/admin">
+                    <i className="fas fa-cogs me-1"></i> Admin
                   </Link>
-                  <Link className="btn btn-dark" to="/login">
-                    <i className="fas fa-sign-in-alt me-1"></i>Ingresar
-                  </Link>
-                </>
-              )}
-            </span>
+                )}
+                
+                {/* BOTÓN SALIR */}
+                <button className="btn btn-danger btn-sm" onClick={logout}>
+                  <i className="fas fa-sign-out-alt me-1"></i>
+                </button>
+              </>
+            ) : (
+              // SI NO HAY USUARIO
+              <>
+                <Link className="btn btn-outline-light me-2 btn-sm" to="/registro">
+                  <i className="fas fa-user-plus me-1"></i> Registro
+                </Link>
+                <Link className="btn btn-light btn-sm" to="/login">
+                  <i className="fas fa-sign-in-alt me-1"></i> Ingresar
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

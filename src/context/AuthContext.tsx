@@ -1,73 +1,66 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react'; // <--- SOLUCIÓN: Importación explícita de tipo
-import { jwtDecode } from "jwt-decode";
+// CAMBIO AQUÍ: Agregamos "type" delante de ReactNode
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import axios from "axios";
 
-interface DecodedToken {
-  sub: string;
-  rol: string;
-  exp: number;
-}
-
+// Definimos la forma del usuario
 interface User {
   email: string;
   isAdmin: boolean;
+  nombre?: string;
 }
 
 interface AuthContextValue {
   user: User | null;
-  login: (token: string) => void;
+  login: (token: string, userData: User) => void;
   logout: () => void;
+  loading: boolean; 
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth debe usarse dentro de AuthProvider');
-  return ctx;
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth debe usarse dentro de AuthProvider");
+  return context;
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  // 1. Inicialización Lazy
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = jwtDecode<DecodedToken>(token);
-        if (decoded.exp * 1000 < Date.now()) {
-          logout();
-        } else {
-          setUser({
-            email: decoded.sub,
-            isAdmin: decoded.rol === 'ADMIN'
-          });
-        }
-      } catch (error) {
-        logout();
-      }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setUser(null);
+    } else {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     }
+    setLoading(false); 
   }, []);
 
-  const login = (token: string) => {
-    localStorage.setItem('token', token);
-    const decoded = jwtDecode<DecodedToken>(token);
-    
-    setUser({
-      email: decoded.sub,
-      isAdmin: decoded.rol === 'ADMIN'
-    });
+  const login = (token: string, userData: User) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
-    window.location.href = '/';
+    delete axios.defaults.headers.common["Authorization"];
+    window.location.href = "/login"; 
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
