@@ -53,14 +53,31 @@ function App() {
 
       const payload = { items: itemsParaBackend };
 
-      await axios.post(`http://localhost:8084/api/orders?email=${user.email}`, payload);
+      console.log("📦 Enviando pedido al backend:", payload);
+      console.log("👤 Usuario:", user.email);
+
+      const response = await axios.post(`http://localhost:8084/api/orders?email=${user.email}`, payload);
       
+      console.log("✅ Pedido exitoso:", response.data);
       clear();
       navigate("/pago-exitoso");
       
-    } catch (error) {
-      console.error("Error al procesar el pedido:", error);
-      alert("Hubo un error al procesar tu compra. Verifica que el servidor esté corriendo en el puerto 8084 o inténtalo nuevamente.");
+    } catch (error: any) {
+      console.error("❌ Error al procesar el pedido:", error);
+      
+      if (error.response) {
+        console.error("📊 Respuesta del servidor:", error.response.data);
+        console.error("🔢 Status code:", error.response.status);
+        
+        const errorMsg = error.response.data?.message || error.response.data?.error || "Error desconocido del servidor";
+        alert(`Error del servidor: ${errorMsg}\n\nVerifica:\n- Que el backend esté corriendo en http://localhost:8084\n- Que los productos existan en la base de datos\n- Que haya stock suficiente`);
+      } else if (error.request) {
+        console.error("📡 No se recibió respuesta del servidor");
+        alert("No se pudo conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:8084");
+      } else {
+        console.error("⚠️ Error:", error.message);
+        alert("Hubo un error al procesar tu compra: " + error.message);
+      }
     }
   };
 
