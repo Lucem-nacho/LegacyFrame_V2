@@ -78,7 +78,7 @@ const AdminPanel = () => {
     try {
       setLoading(true);
       
-      // 1. CARGA DE DATOS PRINCIPALES (Productos, Pedidos, Mensajes)
+      // 1. CARGA DE DATOS PRINCIPALES (Productos, Pedidos, Mensajes, Categorías)
       const [resPed, resProd, resMsg, resCat] = await Promise.all([
         axios.get("http://localhost:8084/api/orders/admin/all"),
         axios.get("http://localhost:8083/api/catalog/productos"),
@@ -111,19 +111,15 @@ const AdminPanel = () => {
     }
   };
 
-  // --- FUNCIÓN ELIMINAR PRODUCTO (NUEVA) ---
+  // --- FUNCIÓN ELIMINAR PRODUCTO ---
   const handleEliminar = async (id: number) => {
     if (!window.confirm("¿Estás seguro de que quieres eliminar este producto? Esta acción no se puede deshacer.")) {
       return;
     }
 
     try {
-      // Llamada al endpoint DELETE que creamos en ProductoController
       await axios.delete(`http://localhost:8083/api/catalog/productos/${id}`);
-      
-      // Actualizamos la tabla visualmente quitando el producto borrado
       setProductos((prev) => prev.filter((p) => p.id !== id));
-      
       alert("Producto eliminado correctamente.");
     } catch (error) {
       console.error("Error al eliminar:", error);
@@ -159,12 +155,18 @@ const AdminPanel = () => {
       return;
     }
 
+    // LÓGICA DE SEGURIDAD PARA IMAGEN:
+    // Si la URL está vacía, usamos una por defecto para evitar errores
+    const imagenFinal = formData.imagenUrl.trim() !== "" 
+        ? formData.imagenUrl 
+        : "https://placehold.co/400x400?text=Sin+Foto";
+
     const payload = {
       nombre: formData.nombre,
       descripcion: formData.descripcion,
       precio: parseFloat(formData.precio),
       stock: parseInt(formData.stock) || 0,
-      imagenUrl: formData.imagenUrl || "https://via.placeholder.com/300x300/cccccc/000000?text=Sin+Imagen",
+      imagenUrl: imagenFinal, // Usamos la URL segura
       categoria: {
           id: parseInt(formData.categoriaId)
       }
@@ -266,13 +268,17 @@ const AdminPanel = () => {
                     <tr key={prod.id}>
                       <td>#{prod.id}</td>
                       <td>
+                        {/* IMAGEN CON PROTECCIÓN ANTI-BUCLE */}
                         <img 
                           src={prod.imagenUrl} 
                           alt={prod.nombre} 
                           width="40" 
                           height="40" 
                           className="rounded object-fit-cover d-block" 
-                          onError={(e) => e.currentTarget.src = "https://via.placeholder.com/40"}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null; // Detiene el bucle infinito
+                            e.currentTarget.src = "https://placehold.co/400x400?text=Sin+Foto"; // Pone imagen segura
+                          }}
                         />
                       </td>
                       <td className="fw-bold">{prod.nombre}</td>
@@ -283,7 +289,6 @@ const AdminPanel = () => {
                       </td>
                       <td>{CLP.format(prod.precio)}</td>
                       <td>
-                        {/* BOTÓN EDITAR */}
                         <button 
                           className="btn btn-sm btn-warning text-dark fw-bold me-2"
                           onClick={() => abrirModalEditar(prod)}
@@ -292,7 +297,6 @@ const AdminPanel = () => {
                           <i className="fas fa-edit"></i>
                         </button>
                         
-                        {/* BOTÓN ELIMINAR (NUEVO) */}
                         <button 
                           className="btn btn-sm btn-danger text-white"
                           onClick={() => handleEliminar(prod.id)}
@@ -462,7 +466,9 @@ const AdminPanel = () => {
                       type="text" className="form-control"
                       value={formData.imagenUrl}
                       onChange={(e) => setFormData({...formData, imagenUrl: e.target.value})}
+                      placeholder="Ej: /assets/foto.jpg"
                     />
+                    <div className="form-text">Si la dejas vacía, se usará una imagen por defecto.</div>
                   </div>
 
                   <div className="mb-3">
