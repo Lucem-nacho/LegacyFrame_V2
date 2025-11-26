@@ -11,7 +11,7 @@ const Navbar = () => {
       <div className="container-fluid"> 
         {/* LOGO */}
         <Link className="navbar-brand" to="/">
-          <img className="logo-brand" src="/assets/logo.png" alt="Legacy Frames" style={{maxHeight: '40px'}} />
+          <img className="logo-brand" src="/assets/logo.png" alt="Legacy Frames" />
         </Link>
         
         {/* BOTÓN HAMBURGUESA (MÓVIL) */}

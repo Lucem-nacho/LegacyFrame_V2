@@ -31,7 +31,8 @@ body {
     background-color: var(--primary-color) !important; 
     border-bottom: 3px solid var(--dark-color);      
     box-shadow: var(--shadow);
-    padding: 15px 20px;
+    padding: 20px 30px;
+    min-height: 80px;
 }
 
 .navbar .navbar-brand {
@@ -41,17 +42,20 @@ body {
     font-size: 1.4rem;
     color: #ffffff !important;
     text-decoration: none;
+    padding: 0;
 }
 
 .navbar .navbar-brand img {
-    margin-right: 12px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
+    margin-right: 0;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .logo-brand {
-    width: 100px;
-    height: auto;
+    width: auto;
+    height: 100px;
+    object-fit: contain;
+    display: block;
 }
 
 .navbar .nav-link {
@@ -166,6 +170,18 @@ body {
 
 .numeros-empresa .numero-destacado {
     font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.numero-destacado {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.precio-destacado {
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--primary-color);
 }
@@ -584,4 +600,137 @@ a:hover {
 /* 7. Badges (Etiquetas) */
 .badge.bg-primary {
     background-color: var(--primary-color) !important;
+}
+
+/* ==================== ESTILOS ESPECÍFICOS PARA MOLDURAS ==================== */
+
+.filter-section {
+    border: 1px solid #e0e0e0;
+}
+
+.filter-section h5 {
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+.filter-section .btn {
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.filter-section .btn.active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.product-item {
+    transition: var(--transition);
+}
+
+.product-info {
+    padding: 15px;
+    background-color: #fff;
+}
+
+.product-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.product-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.product-actions {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-actions .btn {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+}
+
+.info-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+}
+
+.info-section h4 {
+    color: var(--dark-color);
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.info-section ul li {
+    padding: 5px 0;
+    font-size: 0.95rem;
+}
+
+/* Responsive para Molduras */
+@media (max-width: 768px) {
+    .filter-section .btn-group-toggle {
+        flex-direction: column;
+    }
+    
+    .filter-section .btn {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+}
+
+/* ==================== ESTILOS ESPECÍFICOS PARA CUADROS ==================== */
+
+.cuadros-galeria {
+    padding: 20px 0;
+}
+
+.cuadro-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.cuadro-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.cuadro-card .card-title {
+    color: var(--dark-color);
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.cuadro-card .card-text {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.cuadro-card .product-actions {
+    gap: 8px;
+}
+
+.cuadro-card .product-actions .btn {
+    font-size: 0.85rem;
+}
+
+/* Responsive para Cuadros */
+@media (max-width: 768px) {
+    .cuadros-galeria {
+        padding: 10px 0;
+    }
+    
+    .cuadro-card {
+        margin-bottom: 20px;
+    }
 }
