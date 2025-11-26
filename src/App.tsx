@@ -29,7 +29,22 @@ function App() {
     }
 
     try {
-      const itemsParaBackend = items.map(item => ({
+      // Filtrar solo productos con IDs numéricos válidos
+      const itemsValidos = items.filter(item => {
+        const numId = Number(item.id);
+        return !isNaN(numId) && numId > 0;
+      });
+
+      if (itemsValidos.length === 0) {
+        alert("El carrito contiene productos de ejemplo. Por favor, agrega productos reales desde Molduras o Cuadros.");
+        return;
+      }
+
+      if (itemsValidos.length < items.length) {
+        alert("Algunos productos de ejemplo serán excluidos del pedido. Solo se procesarán productos reales.");
+      }
+
+      const itemsParaBackend = itemsValidos.map(item => ({
         productoId: Number(item.id),
         nombreProducto: item.name,
         cantidad: item.quantity,
@@ -45,7 +60,7 @@ function App() {
       
     } catch (error) {
       console.error("Error al procesar el pedido:", error);
-      alert("Hubo un error al procesar tu compra. Revisa el stock o inténtalo nuevamente.");
+      alert("Hubo un error al procesar tu compra. Verifica que el servidor esté corriendo en el puerto 8084 o inténtalo nuevamente.");
     }
   };
 
