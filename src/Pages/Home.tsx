@@ -58,7 +58,13 @@ const Home = () => {
   };
 
   const agregarAlCarrito = (p: Featured) => {
-    addItem({ id: p.id, name: p.name, image: p.image, price: p.price }, 1);
+    addItem({ 
+      id: p.id, 
+      name: p.name, 
+      image: p.image, 
+      price: p.price,
+      stockMax: 999 
+    });
     abrirOffcanvas();
   };
 
