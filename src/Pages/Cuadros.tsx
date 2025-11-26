@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
 import ProductDetailModal from '../components/ProductDetailModal';
+import framePicture from '/assets/Frame Picture.png';
+import fameProxima from '/assets/fameproxima.png';
 
 const CLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' });
 
@@ -30,7 +32,6 @@ const Cuadros = () => {
   const cargarProductos = async () => {
     try {
       const res = await axios.get("http://localhost:8083/api/catalog/productos");
-      // Filtramos solo los que sean de categoría 'cuadros' (asegúrate que el nombre coincida con tu BD)
       const soloCuadros = res.data.filter((p: Product) => 
         p.categoria?.nombre.toLowerCase().includes("cuadros")
       );
@@ -50,78 +51,136 @@ const Cuadros = () => {
       image: product.imagenUrl,
       stockMax: product.stock
     });
-    setModalProducto(null); // Cerrar modal si estaba abierto
+    setModalProducto(null);
   };
 
   if (loading) return <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>;
 
   return (
-    <div className="container py-5">
-      <div className="text-center mb-5">
-        <h1 className="display-4 fw-bold text-primary">Nuestros Cuadros</h1>
-        <p className="lead text-muted">Listos para colgar y decorar tu espacio</p>
-        <hr className="w-25 mx-auto text-primary" />
-      </div>
+    <div>
+      {/* Galería de Cuadros */}
+      <div className="container my-5">
+        <div className="cuadros-galeria">
+          <h2 className="text-center mb-4 section-title">Galería de Cuadros y Marcos</h2>
 
-      <div className="row g-4">
-        {products.map((prod) => (
-          <div key={prod.id} className="col-md-4 col-sm-6">
-            <div className="card h-100 shadow-sm border-0 product-card-hover">
-              <div 
-                className="position-relative overflow-hidden bg-light" 
-                style={{ height: '300px', cursor: 'pointer' }}
-                onClick={() => setModalProducto(prod)}
-              >
-                {/* IMAGEN BLINDADA ANTI-ERROR */}
-                <img 
-                  src={prod.imagenUrl} 
-                  alt={prod.nombre} 
-                  className="w-100 h-100 object-fit-cover transition-transform"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null; // Detiene el bucle
-                    e.currentTarget.src = "https://placehold.co/400x400?text=Sin+Foto"; // URL Segura
-                  }}
-                />
-                
-                {/* Badge de Stock */}
-                {prod.stock < 5 && prod.stock > 0 && (
-                  <span className="position-absolute top-0 end-0 bg-warning text-dark badge m-2 shadow">
-                    ¡Quedan pocos!
-                  </span>
-                )}
-                {prod.stock === 0 && (
-                  <span className="position-absolute top-0 end-0 bg-danger text-white badge m-2 shadow">
-                    Agotado
-                  </span>
-                )}
+          {/* Carousel de Cuadros Destacados */}
+          <div id="carouselCuadros" className="carousel slide mb-5" data-bs-ride="carousel">
+            <div className="carousel-inner">
+              <div className="carousel-item active">
+                <img src={framePicture} className="d-block w-100 carousel-img" alt="Cuadro 1" />
               </div>
+              <div className="carousel-item">
+                <img src={fameProxima} className="d-block w-100 carousel-img" alt="Cuadro 2" />
+              </div>
+            </div>
+            <button className="carousel-control-prev" type="button" data-bs-target="#carouselCuadros" data-bs-slide="prev">
+              <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span className="visually-hidden">Anterior</span>
+            </button>
+            <button className="carousel-control-next" type="button" data-bs-target="#carouselCuadros" data-bs-slide="next">
+              <span className="carousel-control-next-icon" aria-hidden="true"></span>
+              <span className="visually-hidden">Siguiente</span>
+            </button>
+          </div>
 
-              <div className="card-body text-center d-flex flex-column">
-                <h5 className="card-title fw-bold text-truncate">{prod.nombre}</h5>
-                <p className="text-muted small text-truncate">{prod.descripcion}</p>
-                <div className="mt-auto">
-                  <p className="fs-4 fw-bold text-primary mb-3">{CLP.format(prod.precio)}</p>
-                  <button 
-                    className="btn btn-primary rounded-pill w-100 shadow-sm"
-                    onClick={() => agregarAlCarrito(prod)}
-                    disabled={prod.stock === 0}
-                  >
-                    {prod.stock === 0 ? "Sin Stock" : <><i className="fas fa-cart-plus me-2"></i>Agregar</>}
-                  </button>
+          {/* Descripción */}
+          <div className="text-center mb-5">
+            <p className="lead">Explora nuestra colección de cuadros enmarcados y servicios de enmarcación profesional.</p>
+            <p>Ofrecemos enmarcación personalizada para tus obras de arte, fotografías, diplomas y documentos importantes.</p>
+          </div>
+
+          {/* Cuadros */}
+          <div className="row g-4">
+            {products.length > 0 ? (
+              products.map((product) => (
+                <div key={product.id} className="col-lg-4 col-md-6">
+                  <div className="card cuadro-card h-100">
+                    <img 
+                      src={product.imagenUrl} 
+                      className="card-img-top card-img-cover" 
+                      alt={product.nombre}
+                      onError={(e) => { 
+                        e.currentTarget.src = "https://placehold.co/400x400?text=Sin+Foto"; 
+                      }} 
+                    />
+                    <div className="card-body text-center">
+                      <h5 className="card-title">{product.nombre}</h5>
+                      <p className="card-text">{product.descripcion}</p>
+                      <p className="precio-destacado">{CLP.format(product.precio)}</p>
+                      <small className={`d-block mt-2 fw-bold ${product.stock < 5 ? 'text-danger' : 'text-success'}`}>
+                        <i className="fas fa-box-open me-1"></i>
+                        {product.stock > 0 ? `Stock: ${product.stock}` : "Agotado"}
+                      </small>
+                      <div className="d-flex flex-wrap gap-2 mt-3 product-actions justify-content-center">
+                        <button
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={() => setModalProducto(product)}
+                        >
+                          <i className="fas fa-eye me-1"></i> Ver detalles
+                        </button>
+                        <a
+                          href={`https://api.whatsapp.com/send?phone=56227916878&text=${encodeURIComponent(`Hola, me interesa '${product.nombre}'`)}`}
+                          className="btn btn-success btn-sm"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <i className="fab fa-whatsapp"></i> Consultar
+                        </a>
+                        <button
+                          className="btn btn-sm btn-primary agregar-carrito"
+                          onClick={() => agregarAlCarrito(product)}
+                          disabled={product.stock === 0}
+                        >
+                          <i className="fas fa-cart-plus me-1"></i> Agregar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-12 text-center py-5">
+                <div className="alert alert-info">No se encontraron cuadros en la base de datos.</div>
+              </div>
+            )}
+          </div>
+
+          {/* Servicios Adicionales */}
+          <div className="row mt-5">
+            <div className="col-12">
+              <h3 className="text-center mb-4 section-title">Nuestros Servicios</h3>
+              <div className="row g-3">
+                <div className="col-md-4 text-center">
+                  <div className="card border-0 bg-light h-100">
+                    <div className="card-body">
+                      <h5>🖼️ Enmarcación Personalizada</h5>
+                      <p>Creamos marcos a medida para cualquier tipo de obra o documento.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-4 text-center">
+                  <div className="card border-0 bg-light h-100">
+                    <div className="card-body">
+                      <h5>🚚 Despacho a Domicilio</h5>
+                      <p>Entregamos tus cuadros enmarcados directamente en tu hogar.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-4 text-center">
+                  <div className="card border-0 bg-light h-100">
+                    <div className="card-body">
+                      <h5>⚡ Servicio Express</h5>
+                      <p>Enmarcación rápida en 24-48 horas para casos urgentes.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        ))}
-
-        {products.length === 0 && (
-          <div className="col-12 text-center py-5">
-            <p className="text-muted fs-5">No hay cuadros disponibles en este momento.</p>
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* MODAL DE DETALLE */}
+      {/* Modal */}
       {modalProducto && (
         <ProductDetailModal
           show={!!modalProducto}
@@ -131,7 +190,7 @@ const Cuadros = () => {
             image: modalProducto.imagenUrl,
             description: modalProducto.descripcion,
             price: modalProducto.precio,
-            whatsappHref: `https://wa.me/56912345678?text=Hola, me interesa el cuadro: ${modalProducto.nombre}`,
+            whatsappHref: `https://api.whatsapp.com/send?phone=56227916878&text=${encodeURIComponent(`Hola, me interesa '${modalProducto.nombre}'`)}`,
             stock: modalProducto.stock
           }}
           onAddToCart={() => agregarAlCarrito(modalProducto)}
