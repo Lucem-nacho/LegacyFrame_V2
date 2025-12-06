@@ -46,6 +46,9 @@ interface Usuario {
 
 const CLP = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
 
+// URL BASE DEL BACKEND DE PRODUCTOS (Para servir imágenes)
+const API_PRODUCTOS_URL = "http://localhost:8083";
+
 const AdminPanel = () => {
   // Datos del Dashboard
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -59,6 +62,9 @@ const AdminPanel = () => {
   // Estados para el Formulario (Crear/Editar)
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+
+  // Estado para el archivo seleccionado
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -78,7 +84,6 @@ const AdminPanel = () => {
     try {
       setLoading(true);
       
-      // 1. CARGA DE DATOS PRINCIPALES (Productos, Pedidos, Mensajes, Categorías)
       const [resPed, resProd, resMsg, resCat] = await Promise.all([
         axios.get("http://localhost:8084/api/orders/admin/all"),
         axios.get("http://localhost:8083/api/catalog/productos"),
@@ -91,7 +96,6 @@ const AdminPanel = () => {
       setMensajes(resMsg.data);
       setCategorias(resCat.data);
 
-      // 2. CARGA DE USUARIOS (Separada para no bloquear si no es ADMIN)
       try {
           const token = localStorage.getItem("token");
           if (token) {
@@ -108,6 +112,43 @@ const AdminPanel = () => {
     } catch (error) {
       console.error("Error cargando datos generales:", error);
       setLoading(false);
+    }
+  };
+
+  // --- FUNCIÓN HELPER MEJORADA PARA IMÁGENES ---
+  const getImageUrl = (url: string) => {
+    if (!url) return "https://placehold.co/400x400?text=Sin+Foto";
+    
+    // 1. Si es externa, se deja igual
+    if (url.startsWith("http")) return url;
+
+    // 2. CORRECCIÓN AUTOMÁTICA: Si viene con ruta antigua (/assets/), la cambiamos a /images/
+    let cleanUrl = url.replace("/assets/", "/images/");
+
+    // 3. Aseguramos que empiece con /
+    if (!cleanUrl.startsWith("/")) cleanUrl = "/" + cleanUrl;
+
+    // 4. Concatenamos con el servidor backend
+    return `${API_PRODUCTOS_URL}${cleanUrl}`;
+  };
+
+  // --- FUNCIÓN PARA SUBIR IMAGEN ---
+  const uploadImage = async (): Promise<string> => {
+    if (!selectedFile) return formData.imagenUrl; // Si no hay archivo nuevo, devuelve la URL actual
+
+    const data = new FormData();
+    data.append("file", selectedFile);
+
+    try {
+      // Subimos al backend en el puerto 8083
+      const res = await axios.post(`${API_PRODUCTOS_URL}/api/catalog/productos/upload`, data, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      return res.data; // Retorna la ruta ej: /images/uuid_foto.jpg
+    } catch (error) {
+      console.error("Error subiendo imagen:", error);
+      alert("Error al subir la imagen al servidor");
+      return "";
     }
   };
 
@@ -130,6 +171,7 @@ const AdminPanel = () => {
   // --- ABRIR MODAL PARA CREAR ---
   const abrirModalCrear = () => {
     setEditingId(null); 
+    setSelectedFile(null); // Limpiar archivo seleccionado
     setFormData({ nombre: "", descripcion: "", precio: "", stock: "", imagenUrl: "", categoriaId: "" });
     setShowModal(true);
   };
@@ -137,6 +179,7 @@ const AdminPanel = () => {
   // --- ABRIR MODAL PARA EDITAR ---
   const abrirModalEditar = (producto: Producto) => {
     setEditingId(producto.id);
+    setSelectedFile(null); // Limpiar archivo seleccionado
     setFormData({
       nombre: producto.nombre,
       descripcion: producto.descripcion || "",
@@ -155,10 +198,15 @@ const AdminPanel = () => {
       return;
     }
 
-    // LÓGICA DE SEGURIDAD PARA IMAGEN:
-    // Si la URL está vacía, usamos una por defecto para evitar errores
-    const imagenFinal = formData.imagenUrl.trim() !== "" 
-        ? formData.imagenUrl 
+    // 1. Subir imagen (si se seleccionó una)
+    const urlFinal = await uploadImage();
+
+    // Si falló la subida y era un archivo nuevo, detenemos
+    if (selectedFile && !urlFinal) return;
+
+    // Si no hay imagen, ponemos un placeholder
+    const imagenParaGuardar = urlFinal.trim() !== "" 
+        ? urlFinal 
         : "https://placehold.co/400x400?text=Sin+Foto";
 
     const payload = {
@@ -166,7 +214,7 @@ const AdminPanel = () => {
       descripcion: formData.descripcion,
       precio: parseFloat(formData.precio),
       stock: parseInt(formData.stock) || 0,
-      imagenUrl: imagenFinal, // Usamos la URL segura
+      imagenUrl: imagenParaGuardar,
       categoria: {
           id: parseInt(formData.categoriaId)
       }
@@ -268,16 +316,16 @@ const AdminPanel = () => {
                     <tr key={prod.id}>
                       <td>#{prod.id}</td>
                       <td>
-                        {/* IMAGEN CON PROTECCIÓN ANTI-BUCLE */}
+                        {/* USAMOS EL HELPER PARA MOSTRAR LA IMAGEN LOCAL O EXTERNA */}
                         <img 
-                          src={prod.imagenUrl} 
+                          src={getImageUrl(prod.imagenUrl)} 
                           alt={prod.nombre} 
                           width="40" 
                           height="40" 
                           className="rounded object-fit-cover d-block" 
                           onError={(e) => {
-                            e.currentTarget.onerror = null; // Detiene el bucle infinito
-                            e.currentTarget.src = "https://placehold.co/400x400?text=Sin+Foto"; // Pone imagen segura
+                            e.currentTarget.onerror = null; 
+                            e.currentTarget.src = "https://placehold.co/400x400?text=Sin+Foto";
                           }}
                         />
                       </td>
@@ -460,15 +508,29 @@ const AdminPanel = () => {
                     </select>
                   </div>
 
+                  {/* INPUT DE IMAGEN CON PREVISUALIZACIÓN */}
                   <div className="mb-3">
-                    <label className="form-label">URL Imagen</label>
+                    <label className="form-label">Imagen del Producto</label>
                     <input 
-                      type="text" className="form-control"
-                      value={formData.imagenUrl}
-                      onChange={(e) => setFormData({...formData, imagenUrl: e.target.value})}
-                      placeholder="Ej: /assets/foto.jpg"
+                      type="file" 
+                      className="form-control"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setSelectedFile(e.target.files[0]);
+                        }
+                      }}
                     />
-                    <div className="form-text">Si la dejas vacía, se usará una imagen por defecto.</div>
+                    <div className="form-text">Sube una imagen desde tu PC.</div>
+                    
+                    {/* Previsualización de imagen actual si existe */}
+                    {formData.imagenUrl && !selectedFile && (
+                        <div className="mt-2">
+                            <small className="text-muted d-block">Imagen actual:</small>
+                            {/* AQUÍ TAMBIÉN USAMOS EL HELPER PARA VER LA FOTO EN EL MODAL */}
+                            <img src={getImageUrl(formData.imagenUrl)} alt="Actual" width="80" className="img-thumbnail" />
+                        </div>
+                    )}
                   </div>
 
                   <div className="mb-3">

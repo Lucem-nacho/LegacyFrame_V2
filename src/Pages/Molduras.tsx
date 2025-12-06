@@ -5,6 +5,9 @@ import ProductDetailModal from '../components/ProductDetailModal';
 
 const CLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' });
 
+// URL DEL BACKEND (Puerto 8083)
+const API_URL = "http://localhost:8083";
+
 type Category = "all" | "grecas" | "rusticas" | "naturales" | "nativas" | "finger-joint";
 
 interface Product {
@@ -32,7 +35,8 @@ const Molduras = () => {
 
   const cargarProductos = async () => {
     try {
-      const res = await axios.get("http://localhost:8083/api/catalog/productos");
+      const res = await axios.get(`${API_URL}/api/catalog/productos`);
+      // Filtramos para que NO aparezcan los cuadros, solo molduras
       const soloMolduras = res.data.filter((p: Product) => 
         !p.categoria?.nombre.toLowerCase().includes("cuadros")
       );
@@ -51,12 +55,30 @@ const Molduras = () => {
     );
   }, [selectedCategory, products]);
 
+  // --- FUNCIÓN HELPER PARA CORREGIR RUTAS ---
+  const getImageUrl = (url: string) => {
+    if (!url) return "https://placehold.co/400x400?text=Sin+Foto";
+    
+    // 1. Si es externa (http...), la dejamos tal cual
+    if (url.startsWith("http")) return url;
+
+    // 2. TRUCO: Si la base de datos dice "/assets/", lo cambiamos a "/images/"
+    // Esto arregla los productos antiguos que se rompieron al mover las fotos
+    let cleanUrl = url.replace("/assets/", "/images/");
+
+    // 3. Aseguramos que empiece con /
+    if (!cleanUrl.startsWith("/")) cleanUrl = "/" + cleanUrl;
+
+    // 4. Devolvemos la URL apuntando al Backend (8083)
+    return `${API_URL}${cleanUrl}`;
+  };
+
   const agregarAlCarrito = (product: Product) => {
     addItem({
       id: product.id.toString(),
       name: product.nombre,
       price: product.precio,
-      image: product.imagenUrl,
+      image: getImageUrl(product.imagenUrl), // Guardamos la URL corregida en el carrito
       stockMax: product.stock
     });
     setModalProducto(null);
@@ -115,11 +137,13 @@ const Molduras = () => {
           <div key={p.id} className="col-xl-3 col-lg-4 col-md-6 product-item">
             <div className="product-card h-100">
               <div className="product-image-container">
+                {/* Usamos el helper getImageUrl aquí */}
                 <img 
-                  src={p.imagenUrl} 
+                  src={getImageUrl(p.imagenUrl)} 
                   className="product-image" 
                   alt={p.nombre} 
                   onError={(e) => { 
+                    e.currentTarget.onerror = null;
                     e.currentTarget.src = "https://placehold.co/400x400?text=Sin+Foto"; 
                   }} 
                 />
@@ -190,7 +214,7 @@ const Molduras = () => {
           onClose={() => setModalProducto(null)}
           product={{
             name: modalProducto.nombre,
-            image: modalProducto.imagenUrl,
+            image: getImageUrl(modalProducto.imagenUrl), // También corregimos aquí
             description: modalProducto.descripcion,
             price: modalProducto.precio,
             whatsappHref: `https://api.whatsapp.com/send?phone=56227916878&text=${encodeURIComponent(`Hola, me interesa la moldura '${modalProducto.nombre}'`)}`,
