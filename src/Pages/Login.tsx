@@ -37,10 +37,13 @@ const Login = () => {
       const token = response.data.token;
       const decoded = parseJwt(token);
 
+      console.log("Decoded Token:", decoded);
+
+      // --- Validar ROLE_ADMIN ---
       const userData = {
         email: decoded.sub,
         nombre: decoded.nombre,
-        isAdmin: decoded.rol === "ADMIN" || decoded.rol === "ROLE_ADMIN"
+        isAdmin: decoded.rol === "ROLE_ADMIN" || decoded.rol === "ADMIN"
       };
 
       login(token, userData);
@@ -65,7 +68,6 @@ const Login = () => {
         <div className="row justify-content-center align-items-center min-vh-100 py-5">
           <div className="col-lg-5 col-md-7">
             <div className="card shadow-lg border-0 rounded-4 overflow-hidden">
-              {/* Header con color primario */}
               <div className="card-header bg-primary text-white text-center py-4 border-0">
                 <h2 className="mb-1">
                   <i className="fas fa-user-circle me-2"></i>
@@ -76,7 +78,6 @@ const Login = () => {
 
               <div className="card-body p-5">
                 <form onSubmit={handleSubmit}>
-                  {/* Email */}
                   <div className="mb-4">
                     <label className="form-label fw-semibold">
                       <i className="fas fa-envelope me-2 text-primary"></i>
@@ -93,7 +94,6 @@ const Login = () => {
                     />
                   </div>
 
-                  {/* Contraseña */}
                   <div className="mb-4">
                     <label className="form-label fw-semibold">
                       <i className="fas fa-lock me-2 text-primary"></i>
@@ -120,7 +120,6 @@ const Login = () => {
                     </div>
                   </div>
 
-                  {/* Botón de Login */}
                   <button 
                     type="submit" 
                     className="btn btn-primary btn-lg w-100 rounded-3 shadow-sm mb-3"
@@ -139,13 +138,11 @@ const Login = () => {
                     )}
                   </button>
 
-                  {/* Divisor */}
                   <div className="text-center my-4">
                     <hr className="my-3" />
                     <span className="text-muted small">¿No tienes una cuenta?</span>
                   </div>
 
-                  {/* Botón de Registro */}
                   <Link 
                     to="/registro" 
                     className="btn btn-outline-primary btn-lg w-100 rounded-3 shadow-sm"
@@ -156,7 +153,6 @@ const Login = () => {
                 </form>
               </div>
 
-              {/* Footer */}
               <div className="card-footer bg-light text-center py-3 border-0">
                 <small className="text-muted">
                   <i className="fas fa-shield-alt me-1"></i>
@@ -165,7 +161,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Información adicional */}
             <div className="text-center mt-4">
               <p className="text-muted">
                 <i className="fas fa-phone me-2"></i>
