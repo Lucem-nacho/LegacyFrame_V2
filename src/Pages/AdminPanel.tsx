@@ -423,7 +423,7 @@ const AdminPanel = () => {
             <div className="card-body p-0">
               <div className="table-responsive" style={{maxHeight: '300px', overflowY: 'auto'}}>
                 <table className="table table-hover mb-0">
-                  <thead className="table-info sticky-top">
+                  <thead className="table-info sticky-top" style={{ zIndex: 1 }}>
                     <tr>
                       <th>Nombre</th>
                       <th>Email</th>

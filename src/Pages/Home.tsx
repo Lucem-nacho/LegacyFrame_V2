@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext'; // <--- IMPORTANTE: Importar Auth
 import ProductDetailModal from '../components/ProductDetailModal';
 import framePicture from '/assets/Frame Picture.png';
 
 // --- CONFIGURACIÓN ---
 const CLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' });
-const API_URL = "http://localhost:8083"; // URL de tu Backend
+const API_URL = "http://localhost:8083"; 
 
 interface Product {
   id: number;
@@ -20,6 +21,8 @@ interface Product {
 
 const Home = () => {
   const { addItem } = useCart();
+  const { user } = useAuth(); // <--- OBTENEMOS EL USUARIO
+  
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalProducto, setModalProducto] = useState<Product | null>(null);
@@ -31,8 +34,8 @@ const Home = () => {
   const cargarDestacados = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/catalog/productos`);
-      // Mostramos los primeros 3 productos (o podrías filtrar por precio > 50000, etc)
-      setFeaturedProducts(res.data.slice(0, 3));
+      const destacados = res.data.slice(0, 3);
+      setFeaturedProducts(destacados);
       setLoading(false);
     } catch (error) {
       console.error("Error cargando destacados:", error);
@@ -40,16 +43,11 @@ const Home = () => {
     }
   };
 
-  // --- HELPER INTELIGENTE PARA IMÁGENES ---
   const getImageUrl = (url: string) => {
     if (!url) return "https://placehold.co/400x400?text=Sin+Foto";
     if (url.startsWith("http")) return url;
-
-    // Corrección para productos antiguos que dicen "/assets/"
     let cleanUrl = url.replace("/assets/", "/images/");
-    
     if (!cleanUrl.startsWith("/")) cleanUrl = "/" + cleanUrl;
-
     return `${API_URL}${cleanUrl}`;
   };
 
@@ -71,7 +69,7 @@ const Home = () => {
 
   return (
     <div>
-      {/* Banner Principal (Imagen estática del frontend) */}
+      {/* Banner Principal */}
       <div className="container-fluid p-0">
         <img className="banner-img" src={framePicture} alt="Banner Cuadros" />
       </div>
@@ -97,7 +95,6 @@ const Home = () => {
                   {featuredProducts.map((p, idx) => (
                     <div key={p.id} className="col-md-4">
                       <div className="caracteristica text-center h-100">
-                        {/* Usamos el helper para mostrar la imagen correcta */}
                         <img 
                             className="product-thumb" 
                             src={getImageUrl(p.imagenUrl)} 
@@ -135,12 +132,12 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Sección de Texto Estático */}
+          {/* Nuestra Historia */}
           <div className="row mb-5">
             <div className="col-12">
               <h2 className="text-center mb-4 section-title">Nuestra Historia</h2>
               <p className="text-justify">
-                <strong>Legacy Frames</strong> nació en 1998 con la visión de preservar y realzar los momentos más importantes de nuestros clientes. Con más de 25 años de experiencia, nos hemos consolidado como líderes en Santiago.
+                <strong>Legacy Frames</strong> nació en 1998 con la visión de preservar y realzar los momentos más importantes de nuestros clientes a través del arte de la enmarcación. Con más de 25 años de experiencia, nos hemos consolidado como líderes en Santiago.
               </p>
             </div>
           </div>
@@ -167,21 +164,23 @@ const Home = () => {
         </div>
       </div>
 
-      {/* CTA */}
-      <section className="cta-section py-5 bg-primary text-white">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-8">
-              <h3 className="mb-2">¿Listo para Enmarcar tu Historia?</h3>
-              <p className="mb-0">Transformamos tus recuerdos en obras de arte</p>
-            </div>
-            <div className="col-lg-4 text-lg-end">
-              <Link to="/contacto" className="btn btn-light btn-lg me-2">Contactar</Link>
-              <Link to="/registro" className="btn btn-outline-light btn-lg">Únete</Link>
+      {/* --- CTA Section: SOLO SE MUESTRA SI NO HAY USUARIO --- */}
+      {!user && (
+        <section className="cta-section py-5 bg-primary text-white">
+          <div className="container">
+            <div className="row align-items-center">
+              <div className="col-lg-8">
+                <h3 className="mb-2">¿Listo para Enmarcar tu Historia?</h3>
+                <p className="mb-0">Transformamos tus recuerdos en obras de arte</p>
+              </div>
+              <div className="col-lg-4 text-lg-end">
+                <Link to="/contacto" className="btn btn-light btn-lg me-2">Contactar</Link>
+                <Link to="/registro" className="btn btn-outline-light btn-lg">Únete</Link>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Modal Detalle */}
       {modalProducto && (
